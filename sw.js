@@ -1,6 +1,6 @@
 ﻿// Кэш для работы без интернета. При каждом выпуске новой версии увеличивайте VERSION —
 // тогда у пользователей появится предложение «Доступна новая версия — Обновить».
-const VERSION = 'recipes-v4';
+const VERSION = 'recipes-v5';
 const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
@@ -22,8 +22,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Фото: сначала из кэша, иначе из сети с сохранением
-  if (url.hostname === 'images.unsplash.com') {
+  // Фото и рукописный шрифт: сначала из кэша, иначе из сети с сохранением
+  if (url.hostname === 'images.unsplash.com' || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     e.respondWith(caches.open('images').then(async c => {
       const hit = await c.match(req);
       if (hit) return hit;

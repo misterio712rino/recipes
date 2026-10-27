@@ -10,6 +10,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap&subset=cyrillic">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -18,6 +21,7 @@
 :root {
   --bg: #faf6f2; --surface: #ffffff; --surface-2: #f3ece6; --text: #2b211c; --muted: #85746a; --line: #ebe2da;
   --accent: #e4572e; --accent-ink: #ffffff; --accent-soft: #fde8e0;
+  --pen: #2453b8; --pp: #3f8f4e; --pp-soft: #e5f3e3;
   --shadow: 0 1px 2px rgba(60,30,10,.06), 0 6px 20px rgba(60,30,10,.07);
   --radius: 18px;
   --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
@@ -25,6 +29,7 @@
 @media (prefers-color-scheme: dark) {
   :root { --bg: #181311; --surface: #231c19; --surface-2: #2d2421; --text: #f4ece7; --muted: #a8978d; --line: #362c28;
           --accent: #ff7149; --accent-ink: #1b0f0b; --accent-soft: #3d2620;
+          --pen: #8fb4ff; --pp: #7cc98a; --pp-soft: #1f3322;
           --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; }
@@ -161,6 +166,28 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .ing input:checked { background: var(--accent); border-color: var(--accent); }
 .ing input:checked::after { opacity: 1; }
 .ing input:checked + span { text-decoration: line-through; color: var(--muted); }
+/* ПП-версия: переключатель и «рукописные» замены поверх зачёркнутого ингредиента */
+.pp-switch { display: flex; align-items: center; gap: 12px; width: 100%; margin: 20px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--pp-soft); color: var(--text); text-align: left; }
+.pp-switch .i { color: var(--pp); flex: none; }
+.pp-switch .txt { flex: 1; line-height: 1.3; }
+.pp-switch b { display: block; font-size: 15px; }
+.pp-switch small { color: var(--muted); font-size: 13px; }
+.pp-switch .knob { flex: none; width: 46px; height: 28px; border-radius: 14px; background: var(--line); position: relative; transition: background .2s; }
+.pp-switch .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+.pp-switch[aria-checked="true"] .knob { background: var(--pp); }
+.pp-switch[aria-checked="true"] .knob::after { transform: translateX(18px); }
+.pp-done { margin: 20px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--pp-soft); color: var(--muted); font-size: 14px; display: flex; gap: 10px; align-items: center; }
+.pp-done .i { color: var(--pp); flex: none; }
+.swap .hand { display: none; }
+.swap s { text-decoration: none; }
+.pp .swap .hand { display: block; font-family: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive; font-weight: 600; font-size: 23px; line-height: 1; color: var(--pen); transform: rotate(-2.5deg); transform-origin: left bottom; margin: 0 0 1px 4px; animation: write .6s ease-out both; }
+.pp .swap s { color: var(--muted); background: linear-gradient(var(--pen), var(--pen)) no-repeat 0 58% / 100% 2px; animation: strike .35s ease-out both; }
+.ing input:checked + span .hand { opacity: .55; }
+.ing:not(.pp) + .pp-hint { display: none; }
+.pp-hint .i { color: var(--pp); }
+@keyframes strike { from { background-size: 0 2px; } }
+@keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: reduce) { .pp .swap .hand, .pp .swap s { animation: none; } }
 .steps { padding: 0; margin: 0; list-style: none; counter-reset: s; }
 .steps li { counter-increment: s; position: relative; padding: 2px 0 18px 46px; line-height: 1.55; font-size: 16px; }
 .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -271,6 +298,7 @@ const ICONS = {
   next: '<path d="M9 5l7 7-7 7"/>',
   share: '<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
   download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z"/><path d="M2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   frown: '<circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/>',
   // разделы
@@ -500,6 +528,9 @@ function openRecipe(id) {
   const r = byId(id); if (!r) return;
   const checked = new Set(store.get('checked:' + id, []));
   const canShare = !!navigator.share;
+  const swaps = r.ingredients.map(ppSwap), ppCount = swaps.filter(s => s.pp).length;
+  const ppIds = new Set(store.get('pp', []));
+  let ppOn = ppIds.has(id) && ppCount > 0;
   $('#viewPanel').innerHTML = `
     <div class="hero">
       ${media(r, true)}
@@ -517,8 +548,14 @@ function openRecipe(id) {
         <div class="stat">${icon('bars')}<b>${esc(r.difficulty)}</b><span>сложность</span></div>
         <div class="stat">${icon('users')}<b>${r.servings}</b><span>${plural(r.servings, 'порция', 'порции', 'порций')}</span></div>
       </div>
+      ${swaps.some(s => s.pp)
+        ? `<button class="pp-switch" id="vPP" role="switch" aria-checked="${ppOn}">${icon('leaf')}<span class="txt"><b>ПП-версия</b><small>${ppCount} ${plural(ppCount, 'замена', 'замены', 'замен')}: без глютена, лактозы и сахара</small></span><span class="knob"></span></button>`
+        : `<div class="pp-done">${icon('leaf')}Этот рецепт уже подходит для правильного питания</div>`}
       <div class="sec-h"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
-      <ul class="ing">${r.ingredients.map((i, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${esc(i)}</span></label></li>`).join('')}</ul>
+      <ul class="ing${ppOn ? ' pp' : ''}">${swaps.map((s, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${s.pp
+        ? `<span class="swap"><span class="hand">${esc(s.pp)}</span><s>${esc(s.name)}</s>${esc(s.rest)}</span>`
+        : esc(s.name + s.rest)}</span></label></li>`).join('')}</ul>
+      ${ppCount ? `<div class="note pp-hint">${icon('leaf')}В шагах ниже используйте продукты, вписанные от руки</div>` : ''}
       <div class="sec-h"><h4>Приготовление</h4></div>
       <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
       ${'wakeLock' in navigator ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
@@ -531,8 +568,12 @@ function openRecipe(id) {
   });
   $('#vUncheck').onclick = () => { checked.clear(); store.set('checked:' + id, []); $('#viewPanel').querySelectorAll('.ing input').forEach(c => c.checked = false); syncUncheck(); };
   $('#vFav').onclick = () => toggleFav(r.id);
-  if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title,
-    text: `${r.title}\n\nИнгредиенты:\n${r.ingredients.map(i => '• ' + i).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+  if (ppCount) $('#vPP').onclick = () => {
+    ppOn = !ppOn; ppOn ? ppIds.add(id) : ppIds.delete(id); store.set('pp', [...ppIds]);
+    $('#vPP').setAttribute('aria-checked', ppOn); $('#viewPanel .ing').classList.toggle('pp', ppOn);
+  };
+  if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + s.rest).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
