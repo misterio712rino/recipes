@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Мои рецепты</title>
+<meta name="description" content="Рецепты с фотографиями и фильтрами">
+<meta name="theme-color" content="#e8603c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Рецепты">
+<style>
+:root {
+  --bg: #faf6f2; --card: #ffffff; --text: #2b211c; --muted: #8a7a70; --line: #ece3dc;
+  --accent: #e8603c; --accent-soft: #fde7df; --shadow: 0 2px 10px rgba(60,30,10,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1a1513; --card: #241e1b; --text: #f3ebe6; --muted: #a8988e; --line: #3a302b;
+          --accent: #ff7a52; --accent-soft: #3d2620; --shadow: 0 2px 10px rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text);
+       padding-bottom: env(safe-area-inset-bottom); -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+header { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: calc(12px + env(safe-area-inset-top)) 16px 8px; border-bottom: 1px solid var(--line); }
+.top { display: flex; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 420px) { h1 { font-size: 19px; } #installBtn { padding: 0 10px; font-size: 14px; } }
+.icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 12px; height: 40px; min-width: 40px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.icon-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.icon-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.search { max-width: 1100px; margin: 10px auto 0; display: flex; gap: 8px; }
+.search input { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); padding: 0 14px; outline: none; }
+.search input:focus { border-color: var(--accent); }
+.chips { max-width: 1100px; margin: 10px auto 0; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 14px; font-size: 14px; white-space: nowrap; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+#filters { max-width: 1100px; margin: 10px auto 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: none; gap: 14px; flex-direction: column; }
+#filters.open { display: flex; }
+#filters label.title { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+#filters input[type=range] { width: 100%; accent-color: var(--accent); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 14px 16px 90px; }
+.count { color: var(--muted); font-size: 14px; margin: 2px 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer; position: relative; transition: transform .15s; }
+.card:active { transform: scale(.98); }
+.photo { aspect-ratio: 4/3; width: 100%; object-fit: cover; display: block; background: var(--accent-soft); }
+.ph { aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, var(--accent-soft), var(--line)); }
+.card .body { padding: 10px 12px 12px; }
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.meta { display: flex; gap: 10px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
+.fav { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+.badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 999px; }
+.empty { text-align: center; color: var(--muted); padding: 50px 10px; }
+
+.fab { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 58px; height: 58px; border-radius: 50%; border: none; background: var(--accent); color: #fff; font-size: 30px; box-shadow: 0 6px 18px rgba(232,96,60,.45); z-index: 15; }
+
+/* Модальные окна */
+.sheet { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; }
+.sheet.open { display: flex; }
+.panel { background: var(--bg); width: 100%; max-width: 720px; max-height: 94vh; overflow-y: auto; border-radius: 20px 20px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+@media (min-width: 760px) { .sheet { align-items: center; } .panel { border-radius: 20px; } }
+.panel .hero { position: relative; }
+.panel .hero img, .panel .hero .ph { aspect-ratio: 16/10; width: 100%; object-fit: cover; display: block; }
+.close { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; border: none; background: rgba(255,255,255,.92); color: #222; font-size: 20px; }
+.content { padding: 16px 18px; }
+.content h2 { margin: 0 0 8px; font-size: 24px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
+.stat b { display: block; font-size: 16px; }
+.stat span { font-size: 12px; color: var(--muted); }
+.content h4 { margin: 18px 0 8px; font-size: 17px; }
+.ing { list-style: none; padding: 0; margin: 0; }
+.ing li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.ing input { width: 20px; height: 20px; accent-color: var(--accent); margin: 1px 0 0; flex: none; }
+.ing li.done span { text-decoration: line-through; color: var(--muted); }
+.steps { padding: 0; margin: 0; list-style: none; counter-reset: s; }
+.steps li { counter-increment: s; position: relative; padding: 0 0 14px 40px; line-height: 1.5; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 4px 10px; border-radius: 999px; }
+.actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+
+form .field { margin-bottom: 12px; }
+form label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+form input, form select, form textarea { width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 10px 12px; outline: none; }
+form textarea { min-height: 110px; resize: vertical; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.photo-pick { border: 2px dashed var(--line); border-radius: 14px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--muted); background: var(--card) center/cover no-repeat; cursor: pointer; text-align: center; padding: 10px; }
+.photo-pick.has span { display: none; }
+
+#toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 50; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <h1>🍳 Мои рецепты</h1>
+    <button class="icon-btn primary" id="installBtn" hidden>📲 Установить</button>
+    <button class="icon-btn" id="favBtn" title="Избранное">♡</button>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="Поиск по названию или ингредиенту…" autocomplete="off">
+    <button class="icon-btn" id="filterBtn" title="Фильтры" style="white-space:nowrap">⚙︎ Фильтры</button>
+  </div>
+  <div class="chips" id="cats"></div>
+  <div id="filters">
+    <div>
+      <label class="title">Время приготовления: до <b id="timeVal"></b></label>
+      <input type="range" id="time" min="15" max="240" step="15" value="240">
+    </div>
+    <div>
+      <label class="title">Сложность</label>
+      <div class="row" id="diffs"></div>
+    </div>
+    <div>
+      <label class="title">Особенности</label>
+      <div class="row" id="tagChips"></div>
+    </div>
+    <div class="row"><button class="icon-btn" id="resetBtn">Сбросить фильтры</button></div>
+  </div>
+</header>
+
+<main>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<button class="fab" id="addBtn" title="Добавить рецепт">+</button>
+
+<!-- Просмотр рецепта -->
+<div class="sheet" id="viewSheet"><div class="panel" id="viewPanel"></div></div>
+
+<!-- Добавление рецепта -->
+<div class="sheet" id="addSheet">
+  <div class="panel">
+    <div class="content">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <h2 id="formTitle">Новый рецепт</h2>
+        <button class="icon-btn" data-close>✕</button>
+      </div>
+      <form id="form">
+        <div class="field">
+          <label>Фото</label>
+          <div class="photo-pick" id="photoPick"><span>📷 Нажмите, чтобы сделать фото или выбрать из галереи</span></div>
+          <input type="file" id="photoInput" accept="image/*" hidden>
+        </div>
+        <div class="field"><label>Название *</label><input name="title" required maxlength="80"></div>
+        <div class="grid3">
+          <div class="field"><label>Категория</label><select name="category" id="catSelect"></select></div>
+          <div class="field"><label>Время, мин</label><input name="time" type="number" min="1" value="30"></div>
+          <div class="field"><label>Порций</label><input name="servings" type="number" min="1" value="2"></div>
+        </div>
+        <div class="field"><label>Сложность</label>
+          <select name="difficulty"><option>Легко</option><option>Средне</option><option>Сложно</option></select>
+        </div>
+        <div class="field"><label>Особенности (через запятую)</label><input name="tags" placeholder="Вегетарианское, Быстро"></div>
+        <div class="field"><label>Ингредиенты — каждый с новой строки *</label><textarea name="ingredients" required></textarea></div>
+        <div class="field"><label>Шаги приготовления — каждый с новой строки *</label><textarea name="steps" required></textarea></div>
+        <button class="icon-btn primary" style="width:100%;height:48px">Сохранить рецепт</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="recipes.js"></script>
+<script>
+const CATEGORIES = ['Завтрак', 'Супы', 'Основные', 'Салаты', 'Десерты', 'Выпечка'];
+const DIFFS = ['Легко', 'Средне', 'Сложно'];
+const EMOJI = { 'Завтрак': '🍳', 'Супы': '🍲', 'Основные': '🍽️', 'Салаты': '🥗', 'Десерты': '🍰', 'Выпечка': '🥐' };
+
+// Хранилище (localStorage может быть недоступен — тогда работаем в памяти)
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+};
+
+let userRecipes = store.get('userRecipes', []);
+let favorites = new Set(store.get('favorites', []));
+const state = { q: '', cat: 'Все', maxTime: 240, diffs: new Set(), tags: new Set(), favOnly: false };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const allRecipes = () => [...userRecipes, ...BUILTIN_RECIPES];
+const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60) + ' мин' : ''}` : `${m} мин`;
+
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+
+function photoHTML(r, cls) {
+  const ph = `<div class="ph ${cls}">${r.emoji || EMOJI[r.category] || '🍽️'}</div>`;
+  if (!r.image) return ph;
+  // При ошибке загрузки фото заменяем на заглушку с эмодзи
+  return `<img class="${cls}" src="${esc(r.image)}" alt="${esc(r.title)}" loading="lazy"
+           onerror="this.outerHTML='${ph.replace(/'/g, "\\'").replace(/"/g, '&quot;')}'">`;
+}
+
+// ---------- Фильтры ----------
+function chip(label, on, onClick) {
+  const b = document.createElement('button');
+  b.className = 'chip' + (on ? ' on' : ''); b.textContent = label; b.onclick = onClick; return b;
+}
+function renderControls() {
+  const cats = $('#cats'); cats.innerHTML = '';
+  ['Все', ...CATEGORIES].forEach(c => cats.append(chip((c === 'Все' ? '✨ ' : EMOJI[c] + ' ') + c, state.cat === c, () => { state.cat = c; update(); })));
+  const diffs = $('#diffs'); diffs.innerHTML = '';
+  DIFFS.forEach(d => diffs.append(chip(d, state.diffs.has(d), () => { toggle(state.diffs, d); update(); })));
+  const allTags = [...new Set(allRecipes().flatMap(r => r.tags || []))].sort();
+  const tc = $('#tagChips'); tc.innerHTML = '';
+  allTags.forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
+  $('#timeVal').textContent = state.maxTime >= 240 ? 'любое' : fmtTime(state.maxTime);
+  $('#favBtn').classList.toggle('active', state.favOnly);
+  $('#favBtn').textContent = state.favOnly ? '♥' : '♡';
+  const active = state.diffs.size + state.tags.size + (state.maxTime < 240 ? 1 : 0);
+  $('#filterBtn').textContent = '⚙︎ Фильтры' + (active ? ` (${active})` : '');
+  $('#filterBtn').classList.toggle('active', active > 0);
+}
+const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return allRecipes().filter(r =>
+    (state.cat === 'Все' || r.category === state.cat) &&
+    r.time <= (state.maxTime >= 240 ? Infinity : state.maxTime) &&
+    (!state.diffs.size || state.diffs.has(r.difficulty)) &&
+    [...state.tags].every(t => (r.tags || []).includes(t)) &&
+    (!state.favOnly || favorites.has(r.id)) &&
+    (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q)))
+  );
+}
+
+function renderGrid() {
+  const list = filtered();
+  $('#count').textContent = `Найдено рецептов: ${list.length}`;
+  const grid = $('#grid');
+  if (!list.length) { grid.innerHTML = `<div class="empty" style="grid-column:1/-1">😕 Ничего не найдено.<br>Попробуйте изменить фильтры.</div>`; return; }
+  grid.innerHTML = list.map(r => `
+    <div class="card" data-id="${esc(r.id)}">
+      ${photoHTML(r, 'photo')}
+      ${r.user ? '<span class="badge">Мой рецепт</span>' : ''}
+      <button class="fav" data-fav="${esc(r.id)}" aria-label="В избранное">${favorites.has(r.id) ? '❤️' : '🤍'}</button>
+      <div class="body">
+        <h3>${esc(r.title)}</h3>
+        <div class="meta"><span>⏱ ${fmtTime(r.time)}</span><span>📊 ${esc(r.difficulty)}</span><span>${EMOJI[r.category] || ''} ${esc(r.category)}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function update() { renderControls(); renderGrid(); }
+
+$('#grid').addEventListener('click', e => {
+  const fav = e.target.closest('[data-fav]');
+  if (fav) { e.stopPropagation(); toggleFav(fav.dataset.fav); return; }
+  const card = e.target.closest('.card'); if (card) openRecipe(card.dataset.id);
+});
+function toggleFav(id) {
+  toggle(favorites, id); store.set('favorites', [...favorites]);
+  toast(favorites.has(id) ? 'Добавлено в избранное' : 'Убрано из избранного');
+  renderGrid();
+  if ($('#viewSheet').classList.contains('open')) openRecipe(id);
+}
+
+$('#q').addEventListener('input', e => { state.q = e.target.value; renderGrid(); });
+$('#time').addEventListener('input', e => { state.maxTime = +e.target.value; update(); });
+$('#filterBtn').onclick = () => $('#filters').classList.toggle('open');
+$('#favBtn').onclick = () => { state.favOnly = !state.favOnly; update(); };
+$('#resetBtn').onclick = () => { Object.assign(state, { cat: 'Все', maxTime: 240, diffs: new Set(), tags: new Set(), favOnly: false }); $('#time').value = 240; update(); };
+
+// ---------- Просмотр рецепта ----------
+function openRecipe(id) {
+  const r = allRecipes().find(x => x.id === id); if (!r) return;
+  const checked = new Set(store.get('checked:' + id, []));
+  $('#viewPanel').innerHTML = `
+    <div class="hero">${photoHTML(r, '')}<button class="close" data-close>✕</button></div>
+    <div class="content">
+      <h2>${esc(r.title)}</h2>
+      <div class="tags">${[r.category, ...(r.tags || [])].map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="stats">
+        <div class="stat"><b>${fmtTime(r.time)}</b><span>время</span></div>
+        <div class="stat"><b>${esc(r.difficulty)}</b><span>сложность</span></div>
+        <div class="stat"><b>${r.servings}</b><span>порций</span></div>
+      </div>
+      <h4>🧺 Ингредиенты</h4>
+      <ul class="ing">${r.ingredients.map((i, n) => `<li class="${checked.has(n) ? 'done' : ''}"><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${esc(i)}</span></li>`).join('')}</ul>
+      <h4>👩‍🍳 Приготовление</h4>
+      <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <div class="actions">
+        <button class="icon-btn ${favorites.has(r.id) ? 'active' : ''}" id="vFav">${favorites.has(r.id) ? '❤️ В избранном' : '🤍 В избранное'}</button>
+        ${navigator.share ? '<button class="icon-btn" id="vShare">📤 Поделиться</button>' : ''}
+        ${r.user ? '<button class="icon-btn" id="vDel">🗑 Удалить</button>' : ''}
+      </div>
+    </div>`;
+  $('#viewPanel').querySelectorAll('.ing input').forEach(cb => cb.onchange = () => {
+    const n = +cb.dataset.n; cb.checked ? checked.add(n) : checked.delete(n);
+    cb.closest('li').classList.toggle('done', cb.checked); store.set('checked:' + id, [...checked]);
+  });
+  $('#vFav').onclick = () => toggleFav(r.id);
+  if ($('#vShare')) $('#vShare').onclick = () => navigator.share({ title: r.title,
+    text: `${r.title}\n\nИнгредиенты:\n${r.ingredients.map(i => '• ' + i).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+  if ($('#vDel')) $('#vDel').onclick = () => {
+    if (!confirm('Удалить рецепт «' + r.title + '»?')) return;
+    userRecipes = userRecipes.filter(x => x.id !== r.id); store.set('userRecipes', userRecipes);
+    closeSheets(); update(); toast('Рецепт удалён');
+  };
+  $('#viewSheet').classList.add('open');
+  $('#viewPanel').scrollTop = 0;
+}
+
+function closeSheets() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); }
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+
+// ---------- Добавление рецепта ----------
+let pickedPhoto = null;
+$('#catSelect').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join('');
+$('#addBtn').onclick = () => { $('#form').reset(); pickedPhoto = null; setPickPreview(null); $('#addSheet').classList.add('open'); };
+$('#photoPick').onclick = () => $('#photoInput').click();
+function setPickPreview(url) {
+  const p = $('#photoPick'); p.style.backgroundImage = url ? `url("${url}")` : ''; p.classList.toggle('has', !!url);
+}
+// Сжимаем фото до 900px, чтобы оно поместилось в память телефона
+$('#photoInput').onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    const scale = Math.min(1, 900 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = img.width * scale; c.height = img.height * scale;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    pickedPhoto = c.toDataURL('image/jpeg', 0.75); setPickPreview(pickedPhoto); URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(file);
+};
+$('#form').onsubmit = e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const lines = k => f.get(k).split('\n').map(s => s.trim()).filter(Boolean);
+  const r = {
+    id: 'u' + Date.now(), user: true, title: f.get('title').trim(), category: f.get('category'),
+    time: Math.max(1, +f.get('time') || 30), servings: Math.max(1, +f.get('servings') || 1), difficulty: f.get('difficulty'),
+    tags: f.get('tags').split(',').map(s => s.trim()).filter(Boolean),
+    ingredients: lines('ingredients'), steps: lines('steps'), image: pickedPhoto
+  };
+  userRecipes.unshift(r);
+  if (!store.set('userRecipes', userRecipes)) { toast('⚠️ Не хватает памяти — рецепт сохранён только до перезапуска'); }
+  else toast('Рецепт сохранён ✅');
+  closeSheets(); update();
+};
+
+// ---------- Установка на телефон (PWA) ----------
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; });
+window.addEventListener('appinstalled', () => { $('#installBtn').hidden = true; toast('Приложение установлено 🎉'); });
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if (isIOS && !isStandalone) $('#installBtn').hidden = false;
+$('#installBtn').onclick = async () => {
+  if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('#installBtn').hidden = true; }
+  else if (isIOS) alert('Чтобы установить на iPhone:\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой) в Safari\n2. Выберите «На экран „Домой“»');
+};
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+
+update();
+</script>
+</body>
+</html>
