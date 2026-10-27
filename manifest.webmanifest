@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Мои рецепты",
   "short_name": "Рецепты",
-  "description": "Рецепты с фотографиями и фильтрами",
+  "description": "Рецепты с фотографиями: завтраки, обеды, ужины, перекусы, правильное питание и праздничное меню",
   "lang": "ru",
   "dir": "ltr",
   "start_url": "./",
@@ -19,6 +19,7 @@
   ],
   "shortcuts": [
     { "name": "Избранное", "url": "./#fav", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Добавить рецепт", "url": "./#add", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Завтраки", "url": "./#breakfast", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Праздничное меню", "url": "./#festive", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

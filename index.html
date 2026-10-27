@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Мои рецепты</title>
-<meta name="description" content="Рецепты с фотографиями и фильтрами">
+<meta name="description" content="Рецепты с фотографиями: завтраки, обеды, ужины, перекусы, правильное питание и праздничное меню">
 <meta name="theme-color" content="#faf6f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181311" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,14 +17,14 @@
 <style>
 :root {
   --bg: #faf6f2; --surface: #ffffff; --surface-2: #f3ece6; --text: #2b211c; --muted: #85746a; --line: #ebe2da;
-  --accent: #e4572e; --accent-ink: #ffffff; --accent-soft: #fde8e0; --danger: #c93a2a;
+  --accent: #e4572e; --accent-ink: #ffffff; --accent-soft: #fde8e0;
   --shadow: 0 1px 2px rgba(60,30,10,.06), 0 6px 20px rgba(60,30,10,.07);
-  --radius: 18px; --nav-h: 62px;
+  --radius: 18px;
   --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
 }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #181311; --surface: #231c19; --surface-2: #2d2421; --text: #f4ece7; --muted: #a8978d; --line: #362c28;
-          --accent: #ff7149; --accent-ink: #1b0f0b; --accent-soft: #3d2620; --danger: #ff6b5a;
+          --accent: #ff7149; --accent-ink: #1b0f0b; --accent-soft: #3d2620;
           --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; }
@@ -33,54 +33,69 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text);
        -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
 body.lock { overflow: hidden; }
-button, input, select, textarea { font: inherit; color: inherit; }
+button, input { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: none; padding: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .i { width: 20px; height: 20px; flex: none; display: block; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* ---------- Шапка ---------- */
 header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent);
-         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(10px + var(--safe-t)) 16px 10px; border-bottom: 1px solid transparent; transition: border-color .2s; }
+         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(10px + var(--safe-t)) 16px 0; border-bottom: 1px solid transparent; transition: border-color .2s; }
 header.scrolled { border-bottom-color: var(--line); }
 .wrap { max-width: 1100px; margin: 0 auto; }
-.top { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.top { display: flex; align-items: center; gap: 8px; min-height: 42px; }
 h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 12px;
-       background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: background .15s, transform .1s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 14px; border-radius: 12px;
+       background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: transform .1s; position: relative; }
 .btn:active { transform: scale(.97); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn.ghost { background: transparent; }
-.btn.danger { color: var(--danger); }
-.btn.block { width: 100%; height: 50px; font-size: 16px; border-radius: 14px; }
-.btn.round { width: 40px; padding: 0; border-radius: 50%; }
+.btn.sq { width: 42px; padding: 0; }
+.btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.dot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
 
 .search-row { display: flex; gap: 8px; margin-top: 10px; }
 .search { flex: 1; position: relative; }
 .search .i { position: absolute; left: 12px; top: 12px; color: var(--muted); pointer-events: none; }
-.search input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 40px 0 40px; outline: none; font-size: 16px; -webkit-appearance: none; }
+.search input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 40px; outline: none; font-size: 16px; -webkit-appearance: none; }
 .search input::-webkit-search-cancel-button { display: none; }
 .search input:focus { border-color: var(--accent); }
 .search .clear { position: absolute; right: 6px; top: 6px; width: 32px; height: 32px; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--muted); }
 .search.has .clear { display: flex; }
-.filter-btn { position: relative; width: 44px; height: 44px; padding: 0; }
-.filter-btn.on { border-color: var(--accent); color: var(--accent); }
-.dot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; display: none; align-items: center; justify-content: center; padding: 0 5px; }
-.filter-btn.on .dot { display: flex; }
+.search-row .btn { height: 44px; width: 44px; padding: 0; }
 
-.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 10px -16px 0; padding: 0 16px 2px; scroll-padding: 16px; }
-.chips::-webkit-scrollbar { display: none; }
+/* Вкладки-разделы */
+.sections { position: relative; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 12px -16px 0; padding: 0 16px 12px; }
+.sections::-webkit-scrollbar { display: none; }
+.sec-tab { flex: none; display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px 0 11px; border-radius: 999px; border: 1px solid var(--line);
+           background: var(--surface); font-size: 14px; font-weight: 600; white-space: nowrap; color: var(--text); transition: background .15s, color .15s, border-color .15s; }
+.sec-tab .i { width: 18px; height: 18px; color: var(--accent); }
+.sec-tab.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sec-tab.on .i { color: var(--accent-ink); }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
 .chip.on { background: var(--text); border-color: var(--text); color: var(--bg); }
-.chips.wrapchips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+
+/* ---------- Главная: ленты по разделам ---------- */
+main { padding: 4px 16px calc(40px + var(--safe-b)); }
+.row { margin: 10px 0 26px; }
+.row-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.row-head h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
+.row-head button { color: var(--accent); font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.row-head button .i { width: 16px; height: 16px; }
+.strip { display: grid; grid-auto-flow: column; grid-auto-columns: min(72%, 260px); gap: 14px; overflow-x: auto; scrollbar-width: none;
+         margin: 0 -16px; padding: 2px 16px 10px; scroll-snap-type: x mandatory; scroll-padding: 16px; }
+.strip::-webkit-scrollbar { display: none; }
+.strip .card { scroll-snap-align: start; }
+.strip .card h3 { font-size: 16px; }
 
 /* ---------- Список ---------- */
-main { padding: 6px 16px calc(var(--nav-h) + var(--safe-b) + 90px); }
-.count { color: var(--muted); font-size: 14px; margin: 6px 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.count { color: var(--muted); font-size: 14px; margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .count button { color: var(--accent); font-size: 14px; font-weight: 500; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
 .card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; position: relative;
-        transition: transform .15s; animation: rise .3s ease both; text-align: left; width: 100%; display: block; }
+        transition: transform .15s; animation: rise .3s ease both; }
 .card:active { transform: scale(.98); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 .media { position: relative; aspect-ratio: 4/3; background: var(--surface-2); overflow: hidden; }
@@ -99,34 +114,18 @@ main { padding: 6px 16px calc(var(--nav-h) + var(--safe-b) + 90px); }
        display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); z-index: 1; }
 .fav.on { color: #e4372e; }
 .fav:active { transform: scale(.9); }
-.badge { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 500; padding: 4px 9px; border-radius: 999px; backdrop-filter: blur(4px); }
 .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 56px 20px; }
 .empty .big { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--accent); }
 .empty .big .i { width: 28px; height: 28px; }
 .empty b { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
 .empty .btn { margin-top: 16px; }
 
-/* ---------- Нижняя навигация ---------- */
-nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
-           background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-           border-top: 1px solid var(--line); display: flex; justify-content: center; }
-nav.tabs .in { display: flex; width: 100%; max-width: 520px; }
-.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 500; color: var(--muted); position: relative; }
-.tab .i { width: 23px; height: 23px; }
-.tab.on { color: var(--accent); }
-.tab .n { position: absolute; top: 7px; left: calc(50% + 8px); background: var(--accent); color: var(--accent-ink); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
-.fab { position: fixed; right: 18px; bottom: calc(var(--nav-h) + var(--safe-b) + 16px); z-index: 19; height: 56px; padding: 0 20px 0 16px; border-radius: 28px;
-       background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px;
-       box-shadow: 0 8px 22px rgba(228,87,46,.42); transition: transform .15s; }
-.fab:active { transform: scale(.95); }
-.fab .i { width: 24px; height: 24px; }
-
 /* ---------- Панели ---------- */
 .sheet { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; visibility: hidden; pointer-events: none; }
 .sheet::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; transition: opacity .25s; }
 .sheet.open { visibility: visible; pointer-events: auto; }
 .sheet.open::before { opacity: 1; }
-.panel { position: relative; background: var(--bg); width: 100%; max-width: 720px; max-height: 100%; height: 100%; overflow-y: auto; overscroll-behavior: contain;
+.panel { position: relative; background: var(--bg); width: 100%; max-width: 720px; height: 100%; overflow-y: auto; overscroll-behavior: contain;
          transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); padding-bottom: calc(24px + var(--safe-b)); }
 .sheet.open .panel { transform: none; }
 @media (min-width: 760px) {
@@ -141,19 +140,19 @@ nav.tabs .in { display: flex; width: 100%; max-width: 520px; }
 .hero-bar .sp { flex: 1; }
 .glass { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92); color: #2b211c; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
 .glass.on { color: #e4372e; }
-.content { padding: 20px 18px 8px; max-width: 720px; margin: 0 auto; }
-.panel .content { margin-top: -22px; position: relative; background: var(--bg); border-radius: 22px 22px 0 0; }
+.content { padding: 20px 18px 8px; max-width: 720px; margin: -22px auto 0; position: relative; background: var(--bg); border-radius: 22px 22px 0 0; }
 .content h2 { margin: 0 0 10px; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.tag { font-size: 12px; font-weight: 500; background: var(--accent-soft); color: var(--accent); padding: 5px 10px; border-radius: 999px; }
+.tag { font-size: 12px; font-weight: 500; background: var(--surface-2); color: var(--muted); padding: 5px 10px; border-radius: 999px; }
+.tag.sec { background: var(--accent-soft); color: var(--accent); }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 6px; }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; text-align: center; }
 .stat .i { margin: 0 auto 6px; color: var(--accent); }
 .stat b { display: block; font-size: 15px; }
 .stat span { font-size: 12px; color: var(--muted); }
-.sec { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 8px; }
-.sec h4 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
-.sec button { color: var(--accent); font-size: 14px; font-weight: 500; }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 8px; }
+.sec-h h4 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+.sec-h button { color: var(--accent); font-size: 14px; font-weight: 500; }
 .ing { list-style: none; padding: 0; margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .ing label { display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; border-bottom: 1px solid var(--line); cursor: pointer; line-height: 1.4; }
 .ing li:last-child label { border-bottom: none; }
@@ -166,19 +165,17 @@ nav.tabs .in { display: flex; width: 100%; max-width: 520px; }
 .steps li { counter-increment: s; position: relative; padding: 2px 0 18px 46px; line-height: 1.55; font-size: 16px; }
 .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 .steps li:not(:last-child)::after { content: ""; position: absolute; left: 14px; top: 34px; bottom: 4px; width: 2px; background: var(--line); }
-.actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
-.actions .btn { flex: 1; }
 .note { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; margin-top: 14px; }
 .note .i { width: 16px; height: 16px; }
 
-/* ---------- Фильтры (нижняя панель) ---------- */
+/* Фильтры */
 .sheet.compact .panel { height: auto; max-height: 88vh; border-radius: 22px 22px 0 0; }
 @media (min-width: 760px) { .sheet.compact .panel { border-radius: 24px; max-width: 520px; } }
 .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
-.ph-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 0; position: sticky; top: 0; background: var(--bg); z-index: 2; padding-bottom: 10px; }
+.ph-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; position: sticky; top: 0; background: var(--bg); z-index: 2; }
 .ph-head h2 { margin: 0; font-size: 21px; }
 .fgroup { padding: 8px 18px 10px; }
-.fgroup > label, .flabel { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.flabel { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
 .flabel b { color: var(--accent); font-weight: 600; }
 input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 .seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; }
@@ -187,28 +184,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 .foot { display: flex; gap: 8px; padding: 14px 18px 0; }
 .foot .btn { flex: 1; height: 48px; }
 
-/* ---------- Форма ---------- */
-form .field { margin-bottom: 14px; }
-form label.l { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-form .hint { font-weight: 400; color: var(--muted); }
-form input:not([type=file]), form select, form textarea { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; outline: none; font-size: 16px; -webkit-appearance: none; }
-form select { background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
-form input:focus, form select:focus, form textarea:focus { border-color: var(--accent); }
-form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.photo-pick { position: relative; border: 2px dashed var(--line); border-radius: 16px; aspect-ratio: 16/10; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; color: var(--muted); background: var(--surface) center/cover no-repeat; cursor: pointer; text-align: center; padding: 12px; font-size: 14px; width: 100%; }
-.photo-pick .i { width: 32px; height: 32px; color: var(--accent); }
-.photo-pick.has { border-style: solid; border-color: transparent; }
-.photo-pick.has > span, .photo-pick.has > .i { display: none; }
-.photo-del { position: absolute; top: 8px; right: 8px; display: none; }
-.photo-pick.has + .photo-del { display: flex; }
-.photo-wrap { position: relative; }
-.err { color: var(--danger); font-size: 13px; margin-top: 5px; display: none; }
-.field.bad .err { display: block; }
-.field.bad input, .field.bad textarea { border-color: var(--danger); }
-
-/* ---------- Уведомления ---------- */
-#toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 86px); transform: translate(-50%, 12px); background: #2b211c; color: #fff;
+/* Уведомления */
+#toast { position: fixed; left: 50%; bottom: calc(24px + var(--safe-b)); transform: translate(-50%, 12px); background: #2b211c; color: #fff;
          padding: 12px 16px; border-radius: 14px; font-size: 14px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 60;
          max-width: calc(100% - 32px); display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
 #toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
@@ -225,6 +202,7 @@ form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
     <div class="top">
       <h1 id="title">Рецепты</h1>
       <button class="btn primary" id="installBtn" hidden></button>
+      <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
     <div class="search-row">
       <div class="search" id="searchBox">
@@ -232,26 +210,13 @@ form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
         <input id="q" type="search" placeholder="Блюдо или ингредиент" autocomplete="off" enterkeyhint="search" aria-label="Поиск">
         <button class="clear" id="qClear" aria-label="Очистить поиск" data-i="x"></button>
       </div>
-      <button class="btn filter-btn" id="filterBtn" aria-label="Фильтры"><span data-i="sliders"></span><span class="dot" id="filterDot"></span></button>
+      <button class="btn" id="filterBtn" aria-label="Фильтры"><span data-i="sliders"></span><span class="dot" id="filterDot" hidden></span></button>
     </div>
-    <div class="chips" id="cats" role="tablist" aria-label="Категории"></div>
+    <nav class="sections" id="sections" aria-label="Разделы"></nav>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="count"><span id="count"></span><button id="resetLink" hidden>Сбросить фильтры</button></div>
-  <div class="grid" id="grid"></div>
-</main>
-
-<button class="fab" id="addBtn"><span data-i="plus"></span>Добавить</button>
-
-<nav class="tabs" aria-label="Разделы">
-  <div class="in">
-    <button class="tab" data-view="all"><span data-i="book"></span>Рецепты</button>
-    <button class="tab" data-view="fav"><span data-i="heart"></span>Избранное<span class="n" id="favN" hidden></span></button>
-    <button class="tab" data-view="mine"><span data-i="pen"></span>Мои</button>
-  </div>
-</nav>
+<main class="wrap" id="main"></main>
 
 <!-- Просмотр рецепта -->
 <div class="sheet" id="viewSheet" role="dialog" aria-modal="true"><div class="panel" id="viewPanel"></div></div>
@@ -260,7 +225,7 @@ form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
 <div class="sheet compact" id="filterSheet" role="dialog" aria-modal="true" aria-labelledby="fTitle">
   <div class="panel">
     <div class="grab"></div>
-    <div class="ph-head"><h2 id="fTitle">Фильтры</h2><button class="btn round ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
+    <div class="ph-head"><h2 id="fTitle">Фильтры</h2><button class="btn sq ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
     <div class="fgroup">
       <div class="flabel">Сортировка</div>
       <div class="seg" id="sortSeg">
@@ -273,11 +238,11 @@ form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
     </div>
     <div class="fgroup">
       <div class="flabel">Сложность</div>
-      <div class="chips wrapchips" id="diffs"></div>
+      <div class="chips" id="diffs"></div>
     </div>
     <div class="fgroup">
       <div class="flabel">Особенности</div>
-      <div class="chips wrapchips" id="tagChips"></div>
+      <div class="chips" id="tagChips"></div>
     </div>
     <div class="foot">
       <button class="btn" id="resetBtn">Сбросить</button>
@@ -286,45 +251,11 @@ form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
   </div>
 </div>
 
-<!-- Добавление / редактирование -->
-<div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
-  <div class="panel">
-    <div class="ph-head" style="padding-top:calc(12px + var(--safe-t))">
-      <button class="btn round ghost" data-close aria-label="Закрыть" data-i="x"></button>
-      <h2 id="formTitle">Новый рецепт</h2>
-      <span style="width:40px"></span>
-    </div>
-    <div class="content" style="padding-top:6px">
-      <form id="form" novalidate>
-        <div class="field photo-wrap">
-          <button type="button" class="photo-pick" id="photoPick"><span data-i="camera"></span><span>Сфотографируйте блюдо<br>или выберите фото из галереи</span></button>
-          <button type="button" class="glass photo-del" id="photoDel" aria-label="Убрать фото" data-i="trash"></button>
-          <input type="file" id="photoInput" accept="image/*" hidden>
-        </div>
-        <div class="field" data-req><label class="l" for="fTitleIn">Название</label><input id="fTitleIn" name="title" maxlength="80" placeholder="Например, Бабушкины пирожки"><div class="err">Введите название</div></div>
-        <div class="grid2">
-          <div class="field"><label class="l" for="fCat">Категория</label><select id="fCat" name="category"></select></div>
-          <div class="field"><label class="l" for="fDiff">Сложность</label><select id="fDiff" name="difficulty"><option>Легко</option><option>Средне</option><option>Сложно</option></select></div>
-          <div class="field"><label class="l" for="fTime">Время, мин</label><input id="fTime" name="time" type="number" inputmode="numeric" min="1" value="30"></div>
-          <div class="field"><label class="l" for="fServ">Порций</label><input id="fServ" name="servings" type="number" inputmode="numeric" min="1" value="2"></div>
-        </div>
-        <div class="field"><label class="l">Особенности <span class="hint">— нажмите, чтобы выбрать</span></label><div class="chips wrapchips" id="formTags"></div></div>
-        <div class="field" data-req><label class="l" for="fIng">Ингредиенты <span class="hint">— каждый с новой строки</span></label><textarea id="fIng" name="ingredients" placeholder="Мука — 300 г&#10;Яйца — 2 шт."></textarea><div class="err">Добавьте хотя бы один ингредиент</div></div>
-        <div class="field" data-req><label class="l" for="fSteps">Приготовление <span class="hint">— каждый шаг с новой строки</span></label><textarea id="fSteps" name="steps" placeholder="Смешайте муку с яйцами.&#10;Замесите тесто."></textarea><div class="err">Опишите хотя бы один шаг</div></div>
-        <button class="btn primary block" id="saveBtn">Сохранить рецепт</button>
-      </form>
-    </div>
-  </div>
-</div>
-
 <div id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastBtn" hidden></button></div>
 
 <script src="recipes.js"></script>
 <script>
-const CATEGORIES = ['Завтрак', 'Супы', 'Основные', 'Салаты', 'Десерты', 'Выпечка'];
 const DIFFS = ['Легко', 'Средне', 'Сложно'];
-const BASE_TAGS = ['Вегетарианское', 'Быстро', 'ПП', 'Мясное', 'Гриль'];
-const EMOJI = { 'Завтрак': '🍳', 'Супы': '🍲', 'Основные': '🍽️', 'Салаты': '🥗', 'Десерты': '🍰', 'Выпечка': '🥐' };
 const MAX_TIME = 240;
 
 // ---------- Иконки ----------
@@ -335,18 +266,21 @@ const ICONS = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   bars: '<path d="M6 19v-5M12 19V10M18 19V5"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2c2 .8 3.5 2.9 3.5 5.8"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
   back: '<path d="M15 5l-7 7 7 7"/>',
+  next: '<path d="M9 5l7 7-7 7"/>',
   share: '<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
-  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
-  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
-  pen: '<path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
-  book: '<path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H19"/>',
-  camera: '<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l2-3h6l2 3h2.5A1.5 1.5 0 0 1 21 8.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><circle cx="12" cy="13" r="3.5"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  frown: '<circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/>'
+  frown: '<circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/>',
+  // разделы
+  all: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+  breakfast: '<path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 2.5c-.6 1 .6 1.8 0 3M12 2.5c-.6 1 .6 1.8 0 3"/>',
+  lunch: '<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 3.5c-.7 1.2.7 2 0 3.5M12 3.5c-.7 1.2.7 2 0 3.5M16 3.5c-.7 1.2.7 2 0 3.5"/>',
+  dinner: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+  snack: '<path d="M12 7c-1.5-1-5-1.5-6.5 1.5S5 17 8 20c1.5 1.5 3 .5 4 .5s2.5 1 4-.5c3-3 4-8.5 2.5-11.5S13.5 6 12 7z"/><path d="M12 7c0-2 1-3.5 3-4"/>',
+  healthy: '<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-6.5 9.5-8.5"/>',
+  festive: '<path d="M4 20 9 7l8 8z"/><path d="M14 4.5v.01M19.5 10v.01M17 3l-.8 2.2M21 7l-2.2.8M12.5 9.5 15 7"/>'
 };
 const icon = (n, fill) => `<svg class="i" viewBox="0 0 24 24" fill="${fill ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => el.insertAdjacentHTML('afterbegin', icon(el.dataset.i)));
@@ -357,18 +291,20 @@ const store = {
   get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
 };
+try { localStorage.removeItem('userRecipes'); } catch {}   // своих рецептов больше нет
 
-let userRecipes = store.get('userRecipes', []);
-let favorites = new Set(store.get('favorites', []));
-const fresh = () => ({ q: '', cat: 'Все', maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' });
-const state = Object.assign(fresh(), { view: 'all' });
+const ids = new Set(RECIPES.map(r => r.id));
+let favorites = new Set(store.get('favorites', []).filter(id => ids.has(id)));
+const freshFilters = () => ({ maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' });
+const state = Object.assign({ q: '', section: 'all', favOnly: false }, freshFilters());
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const allRecipes = () => [...userRecipes, ...BUILTIN_RECIPES];
-const byId = id => allRecipes().find(r => r.id === id);
+const byId = id => RECIPES.find(r => r.id === id);
+const sectionById = id => SECTIONS.find(s => s.id === id);
 const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60) + ' мин' : ''}` : `${m} мин`;
 const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
+const recipesWord = n => `${n} ${plural(n, 'рецепт', 'рецепта', 'рецептов')}`;
 
 // Постоянное сообщение (предложение обновиться) не исчезает само;
 // обычные сообщения показываются поверх и затем возвращают его на экран
@@ -387,29 +323,49 @@ function toast(msg, action, onAction, isSticky) {
 
 // Фото с плавным появлением; при ошибке — заглушка с эмодзи
 function media(r, eager) {
-  const emoji = esc(r.emoji || EMOJI[r.category] || '🍽️');
+  const emoji = esc(r.emoji || '🍽️');
   if (!r.image) return `<div class="media fail" data-emoji="${emoji}"></div>`;
   return `<div class="media" data-emoji="${emoji}"><img src="${esc(r.image)}" alt="" ${eager ? '' : 'loading="lazy"'} decoding="async"
     onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.classList.add('fail');this.remove()"></div>`;
 }
 
-// ---------- Фильтрация ----------
-function activeFilters() { return state.diffs.size + state.tags.size + (state.maxTime < MAX_TIME ? 1 : 0) + (state.sort !== 'default' ? 1 : 0); }
+function card(r, i, eager) {
+  const on = favorites.has(r.id);
+  return `<article class="card" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i, 8) * 30}ms" tabindex="0" aria-label="${esc(r.title)}">
+      ${media(r, eager)}
+      <button class="fav ${on ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', on)}</button>
+      <div class="body">
+        <h3>${esc(r.title)}</h3>
+        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('bars')}${esc(r.difficulty)}</span></div>
+      </div>
+    </article>`;
+}
 
-function filtered() {
-  const q = state.q.trim().toLowerCase();
-  const list = allRecipes().filter(r =>
-    (state.view !== 'fav' || favorites.has(r.id)) &&
-    (state.view !== 'mine' || r.user) &&
-    (state.cat === 'Все' || r.category === state.cat) &&
-    (state.maxTime >= MAX_TIME || r.time <= state.maxTime) &&
+// ---------- Фильтрация ----------
+const filterCount = () => state.diffs.size + state.tags.size + (state.maxTime < MAX_TIME ? 1 : 0) + (state.sort !== 'default' ? 1 : 0);
+const narrowed = () => filterCount() > 0 || !!state.q.trim();
+
+// Поиск без учёта окончаний: «курица» найдёт «куриная», «яйца» — «яйцо»
+const norm = s => s.toLowerCase().replace(/ё/g, 'е');
+const stem = w => w.length >= 6 ? w.slice(0, -2) : w.length >= 4 ? w.slice(0, -1) : w;
+const searchText = new Map(RECIPES.map(r => [r.id, norm([r.title, ...r.ingredients].join(' '))]));
+function matches(r) {
+  const words = norm(state.q).split(/[\s,]+/).filter(Boolean).map(stem);
+  return (state.maxTime >= MAX_TIME || r.time <= state.maxTime) &&
     (!state.diffs.size || state.diffs.has(r.difficulty)) &&
-    [...state.tags].every(t => (r.tags || []).includes(t)) &&
-    (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q)))
-  );
-  if (state.sort === 'time') list.sort((a, b) => a.time - b.time);
-  if (state.sort === 'alpha') list.sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+    [...state.tags].every(t => r.tags.includes(t)) &&
+    words.every(w => searchText.get(r.id).includes(w));
+}
+function sorted(list) {
+  if (state.sort === 'time') return list.slice().sort((a, b) => a.time - b.time);
+  if (state.sort === 'alpha') return list.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru'));
   return list;
+}
+function filtered() {
+  return sorted(RECIPES.filter(r =>
+    (!state.favOnly || favorites.has(r.id)) &&
+    (state.section === 'all' || r.sections.includes(state.section)) &&
+    matches(r)));
 }
 
 function chip(label, on, onClick) {
@@ -418,82 +374,97 @@ function chip(label, on, onClick) {
   return b;
 }
 const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
-const allTags = () => [...new Set([...BASE_TAGS, ...allRecipes().flatMap(r => r.tags || [])])];
+const ALL_TAGS = [...new Set(RECIPES.flatMap(r => r.tags))];
 
 function renderControls() {
-  const cats = $('#cats'); cats.innerHTML = '';
-  ['Все', ...CATEGORIES].forEach(c => cats.append(chip(c, state.cat === c, () => { state.cat = c; update(); })));
+  $('#sections').innerHTML = [{ id: 'all', title: 'Все' }, ...SECTIONS].map(s =>
+    `<button class="sec-tab ${state.section === s.id ? 'on' : ''}" data-sec="${s.id}" aria-current="${state.section === s.id}">${icon(s.id)}${s.title}</button>`).join('');
   const diffs = $('#diffs'); diffs.innerHTML = '';
   DIFFS.forEach(d => diffs.append(chip(d, state.diffs.has(d), () => { toggle(state.diffs, d); update(); })));
   const tc = $('#tagChips'); tc.innerHTML = '';
-  allTags().forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
+  ALL_TAGS.forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
   document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === state.sort));
   $('#time').value = state.maxTime;
   $('#timeVal').textContent = state.maxTime >= MAX_TIME ? 'любое' : 'до ' + fmtTime(state.maxTime);
-  const n = activeFilters();
-  $('#filterBtn').classList.toggle('on', n > 0); $('#filterDot').textContent = n;
+  const n = filterCount();
+  $('#filterBtn').classList.toggle('on', n > 0); $('#filterDot').hidden = !n; $('#filterDot').textContent = n;
   $('#searchBox').classList.toggle('has', !!state.q);
-  $('#title').textContent = { all: 'Рецепты', fav: 'Избранное', mine: 'Мои рецепты' }[state.view];
-  document.querySelectorAll('.tab').forEach(t => { t.classList.toggle('on', t.dataset.view === state.view); t.setAttribute('aria-current', t.dataset.view === state.view ? 'page' : 'false'); });
-  $('#favN').hidden = !favorites.size; $('#favN').textContent = favorites.size;
+  $('#favBtn').innerHTML = icon('heart', state.favOnly) + `<span class="dot" id="favN" ${favorites.size ? '' : 'hidden'}>${favorites.size}</span>`;
+  $('#favBtn').classList.toggle('on', state.favOnly);
+  $('#favBtn').setAttribute('aria-pressed', state.favOnly);
+  $('#title').textContent = state.favOnly ? 'Избранное' : state.section === 'all' ? 'Рецепты' : sectionById(state.section).title;
 }
 
 function emptyState() {
-  const anyFilter = activeFilters() || state.q || state.cat !== 'Все';
-  if (state.view === 'fav' && !favorites.size)
+  if (state.favOnly && !favorites.size)
     return `<div class="empty"><div class="big">${icon('heart')}</div><b>Здесь пока пусто</b>Нажмите на сердечко у рецепта —<br>и он появится в избранном.</div>`;
-  if (state.view === 'mine' && !userRecipes.length)
-    return `<div class="empty"><div class="big">${icon('pen')}</div><b>Своих рецептов пока нет</b>Сохраните любимое блюдо с фото —<br>оно будет всегда под рукой.<br><button class="btn primary" onclick="openForm()">${icon('plus')}Добавить рецепт</button></div>`;
-  return `<div class="empty"><div class="big">${icon('frown')}</div><b>Ничего не нашлось</b>Попробуйте другой запрос${anyFilter ? '<br>или сбросьте фильтры.<br><button class="btn" onclick="resetAll()">Сбросить фильтры</button>' : '.'}</div>`;
+  const canReset = narrowed() || state.section !== 'all' || state.favOnly;
+  return `<div class="empty"><div class="big">${icon('frown')}</div><b>Ничего не нашлось</b>Попробуйте другой запрос${canReset ? ' или другой раздел.<br><button class="btn" data-reset>Показать все рецепты</button>' : '.'}</div>`;
 }
 
-function renderGrid() {
+function render() {
+  const main = $('#main');
+  // Главная без поиска и фильтров — ленты по разделам
+  if (state.section === 'all' && !state.favOnly && !narrowed()) {
+    main.innerHTML = SECTIONS.map(s => {
+      const list = RECIPES.filter(r => r.sections.includes(s.id));
+      return `<section class="row">
+        <div class="row-head"><h2>${s.title}</h2><button data-sec="${s.id}">Все ${list.length}${icon('next')}</button></div>
+        <div class="strip">${list.map((r, i) => card(r, i, s === SECTIONS[0] && i < 2)).join('')}</div>
+      </section>`;
+    }).join('');
+    $('#applyBtn').textContent = `Показать ${RECIPES.length}`;
+    return;
+  }
   const list = filtered();
-  const anyFilter = activeFilters() || state.q || state.cat !== 'Все';
-  $('#count').textContent = list.length ? `${list.length} ${plural(list.length, 'рецепт', 'рецепта', 'рецептов')}` : '';
-  $('#resetLink').hidden = !anyFilter || !list.length;
   $('#applyBtn').textContent = list.length ? `Показать ${list.length}` : 'Ничего не найдено';
-  const grid = $('#grid');
-  if (!list.length) { grid.innerHTML = emptyState(); return; }
-  grid.innerHTML = list.map((r, i) => `
-    <article class="card" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i, 8) * 30}ms" tabindex="0" aria-label="${esc(r.title)}">
-      ${media(r, i < 4)}
-      ${r.user ? '<span class="badge">Мой рецепт</span>' : ''}
-      <button class="fav ${favorites.has(r.id) ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${favorites.has(r.id) ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', favorites.has(r.id))}</button>
-      <div class="body">
-        <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('bars')}${esc(r.difficulty)}</span><span>${esc(r.category)}</span></div>
-      </div>
-    </article>`).join('');
+  main.innerHTML = `
+    <div class="count"><span>${list.length ? recipesWord(list.length) : ''}</span>${narrowed() && list.length ? '<button data-reset-filters>Сбросить фильтры</button>' : ''}</div>
+    <div class="grid">${list.length ? list.map((r, i) => card(r, i, i < 4)).join('') : emptyState()}</div>`;
 }
 
-function update() { renderControls(); renderGrid(); }
-function resetAll() { Object.assign(state, fresh()); $('#q').value = ''; update(); }
+function update() { renderControls(); render(); }
+// Прокручивает ленту вкладок так, чтобы выбранная была по центру
+function centerTab() {
+  const strip = $('#sections'), tab = strip.querySelector('.sec-tab.on'); if (!tab) return;
+  strip.scrollLeft = tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2;
+}
+function goSection(id) { state.section = id; state.favOnly = false; update(); scrollTo(0, 0); centerTab(); }
 
-$('#grid').addEventListener('click', e => {
+$('#main').addEventListener('click', e => {
   const fav = e.target.closest('[data-fav]');
   if (fav) { e.stopPropagation(); toggleFav(fav.dataset.fav); return; }
-  const card = e.target.closest('.card'); if (card) openRecipe(card.dataset.id);
+  const sec = e.target.closest('[data-sec]'); if (sec) { goSection(sec.dataset.sec); return; }
+  if (e.target.closest('[data-reset]')) { Object.assign(state, freshFilters(), { q: '', section: 'all', favOnly: false }); $('#q').value = ''; update(); return; }
+  if (e.target.closest('[data-reset-filters]')) { Object.assign(state, freshFilters(), { q: '' }); $('#q').value = ''; update(); return; }
+  const c = e.target.closest('.card'); if (c) openRecipe(c.dataset.id);
 });
-$('#grid').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openRecipe(e.target.dataset.id); });
+$('#main').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openRecipe(e.target.dataset.id); });
+$('#sections').addEventListener('click', e => { const b = e.target.closest('[data-sec]'); if (b) goSection(b.dataset.sec); });
 
 function toggleFav(id) {
   toggle(favorites, id); store.set('favorites', [...favorites]);
   if (navigator.vibrate) navigator.vibrate(10);
   toast(favorites.has(id) ? 'Добавлено в избранное' : 'Убрано из избранного');
-  update();
+  // На главной перерисовываем только сердечки, чтобы ленты не прокручивались в начало
+  if (!state.favOnly) {
+    document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => {
+      const on = favorites.has(id); b.classList.toggle('on', on); b.innerHTML = icon('heart', on);
+      b.setAttribute('aria-label', on ? 'Убрать из избранного' : 'В избранное');
+    });
+    renderControls();
+  } else update();
   if ($('#viewSheet').classList.contains('open')) refreshFavButton(id);
 }
 
 let qTimer;
-$('#q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value; renderControls(); renderGrid(); }, 120); });
+$('#q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value; update(); }, 150); });
 $('#qClear').onclick = () => { $('#q').value = ''; state.q = ''; update(); $('#q').focus(); };
 $('#time').addEventListener('input', e => { state.maxTime = +e.target.value; update(); });
 $('#sortSeg').onclick = e => { const b = e.target.closest('[data-sort]'); if (b) { state.sort = b.dataset.sort; update(); } };
 $('#filterBtn').onclick = () => openSheet('#filterSheet');
-$('#resetBtn').onclick = () => { Object.assign(state, { maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' }); update(); };
-$('#resetLink').onclick = resetAll;
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => { state.view = t.dataset.view; update(); scrollTo({ top: 0, behavior: 'smooth' }); });
+$('#favBtn').onclick = () => { state.favOnly = !state.favOnly; update(); scrollTo({ top: 0, behavior: 'smooth' }); };
+$('#resetBtn').onclick = () => { Object.assign(state, freshFilters()); update(); };
 addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 4), { passive: true });
 
 // ---------- Панели и кнопка «Назад» на телефоне ----------
@@ -540,17 +511,16 @@ function openRecipe(id) {
     </div>
     <div class="content">
       <h2>${esc(r.title)}</h2>
-      <div class="tags">${[r.category, ...(r.tags || [])].map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="tags">${r.sections.map(s => `<span class="tag sec">${esc(sectionById(s).title)}</span>`).join('')}${r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
       <div class="stats">
         <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>время</span></div>
         <div class="stat">${icon('bars')}<b>${esc(r.difficulty)}</b><span>сложность</span></div>
         <div class="stat">${icon('users')}<b>${r.servings}</b><span>${plural(r.servings, 'порция', 'порции', 'порций')}</span></div>
       </div>
-      <div class="sec"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
+      <div class="sec-h"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
       <ul class="ing">${r.ingredients.map((i, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${esc(i)}</span></label></li>`).join('')}</ul>
-      <div class="sec"><h4>Приготовление</h4></div>
+      <div class="sec-h"><h4>Приготовление</h4></div>
       <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-      ${r.user ? `<div class="actions"><button class="btn" id="vEdit">${icon('edit')}Изменить</button><button class="btn danger" id="vDel">${icon('trash')}Удалить</button></div>` : ''}
       ${'wakeLock' in navigator ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
     </div>`;
   refreshFavButton(id);
@@ -563,90 +533,10 @@ function openRecipe(id) {
   $('#vFav').onclick = () => toggleFav(r.id);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title,
     text: `${r.title}\n\nИнгредиенты:\n${r.ingredients.map(i => '• ' + i).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
-  if (r.user) {
-    $('#vEdit').onclick = () => openForm(r);
-    $('#vDel').onclick = () => {
-      if (!confirm(`Удалить рецепт «${r.title}»?`)) return;
-      const idx = userRecipes.findIndex(x => x.id === r.id), removed = userRecipes[idx];
-      userRecipes.splice(idx, 1); store.set('userRecipes', userRecipes); closeSheets(); update();
-      toast('Рецепт удалён', 'Вернуть', () => { userRecipes.splice(idx, 0, removed); store.set('userRecipes', userRecipes); update(); });
-    };
-  }
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
 }
-
-// ---------- Добавление и редактирование ----------
-let pickedPhoto = null, editingId = null, formTags = new Set();
-$('#fCat').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join('');
-$('#addBtn').onclick = () => openForm();
-
-function renderFormTags() {
-  const box = $('#formTags'); box.innerHTML = '';
-  allTags().forEach(t => box.append(chip(t, formTags.has(t), () => { toggle(formTags, t); renderFormTags(); })));
-}
-function setPhoto(url) {
-  pickedPhoto = url;
-  const p = $('#photoPick'); p.style.backgroundImage = url ? `url("${url}")` : ''; p.classList.toggle('has', !!url);
-}
-function openForm(r) {
-  const f = $('#form'); f.reset(); f.querySelectorAll('.field').forEach(x => x.classList.remove('bad'));
-  editingId = r ? r.id : null;
-  $('#formTitle').textContent = r ? 'Изменить рецепт' : 'Новый рецепт';
-  $('#saveBtn').textContent = r ? 'Сохранить изменения' : 'Сохранить рецепт';
-  formTags = new Set(r ? r.tags : []);
-  setPhoto(r ? r.image : null);
-  if (r) {
-    f.title.value = r.title; f.category.value = r.category; f.difficulty.value = r.difficulty;
-    f.time.value = r.time; f.servings.value = r.servings;
-    f.ingredients.value = r.ingredients.join('\n'); f.steps.value = r.steps.join('\n');
-  } else if (state.cat !== 'Все') f.category.value = state.cat;
-  renderFormTags();
-  openSheet('#formSheet');
-  $('#formSheet .panel').scrollTop = 0;
-}
-$('#photoPick').onclick = () => $('#photoInput').click();
-$('#photoDel').onclick = () => setPhoto(null);
-// Сжимаем фото до 1000 px, чтобы оно поместилось в память телефона
-$('#photoInput').onchange = e => {
-  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
-  const img = new Image(), url = URL.createObjectURL(file);
-  img.onload = () => {
-    const scale = Math.min(1, 1000 / Math.max(img.width, img.height));
-    const c = document.createElement('canvas'); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    setPhoto(c.toDataURL('image/jpeg', 0.78)); URL.revokeObjectURL(url);
-  };
-  img.onerror = () => { toast('Не удалось открыть фото'); URL.revokeObjectURL(url); };
-  img.src = url;
-};
-$('#form').addEventListener('input', e => e.target.closest('.field')?.classList.remove('bad'));
-$('#form').onsubmit = e => {
-  e.preventDefault();
-  const f = e.target;
-  const lines = v => v.split('\n').map(s => s.replace(/^[\s•\-–—*\d.)]+/, '').trim()).filter(Boolean);
-  const data = {
-    title: f.title.value.trim(), category: f.category.value, difficulty: f.difficulty.value,
-    time: Math.max(1, Math.round(+f.time.value) || 30), servings: Math.max(1, Math.round(+f.servings.value) || 1),
-    tags: [...formTags], ingredients: lines(f.ingredients.value), steps: lines(f.steps.value), image: pickedPhoto
-  };
-  const bad = [[f.title, !data.title], [f.ingredients, !data.ingredients.length], [f.steps, !data.steps.length]].filter(([, b]) => b);
-  bad.forEach(([el]) => el.closest('.field').classList.add('bad'));
-  if (bad.length) { bad[0][0].focus(); return; }
-
-  const prev = userRecipes.slice();
-  let id;
-  if (editingId) { id = editingId; const i = userRecipes.findIndex(x => x.id === id); userRecipes[i] = { ...userRecipes[i], ...data }; }
-  else { id = 'u' + Date.now(); userRecipes.unshift({ id, user: true, ...data }); }
-  if (!store.set('userRecipes', userRecipes)) {
-    userRecipes = prev;
-    toast('Память телефона заполнена — попробуйте фото поменьше или удалите старые рецепты'); return;
-  }
-  update();
-  toast(editingId ? 'Изменения сохранены' : 'Рецепт сохранён');
-  if (editingId) openRecipe(id); else closeSheets();
-};
 
 // ---------- Установка на телефон ----------
 let deferredPrompt = null;
@@ -678,12 +568,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Быстрые действия с иконки приложения (долгое нажатие на Android)
-const startHash = location.hash;
+// Быстрые действия с иконки приложения (долгое нажатие на Android): #fav или #<раздел>
+const startHash = location.hash.slice(1);
 if (startHash) history.replaceState(null, '', location.pathname);
-if (startHash === '#fav') state.view = 'fav';
+if (startHash === 'fav') state.favOnly = true;
+else if (sectionById(startHash)) state.section = startHash;
 update();
-if (startHash === '#add') openForm();
+centerTab();
 </script>
 </body>
 </html>
