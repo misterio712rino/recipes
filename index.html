@@ -155,6 +155,14 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .stat .i { margin: 0 auto 6px; color: var(--accent); }
 .stat b { display: block; font-size: 15px; }
 .stat span { font-size: 12px; color: var(--muted); }
+.stat.portions { padding: 8px 4px 12px; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; }
+.stepper b { min-width: 26px; font-size: 18px; }
+.stepper button { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.stepper button .i { width: 16px; height: 16px; margin: 0; }
+.stepper button:disabled { opacity: .35; }
+.scaled { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: -2px 0 10px; font-size: 13px; color: var(--muted); }
+.scaled button { color: var(--accent); font-size: 13px; font-weight: 500; white-space: nowrap; }
 .sec-h { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 8px; }
 .sec-h h4 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
 .sec-h button { color: var(--accent); font-size: 14px; font-weight: 500; }
@@ -256,7 +264,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
     <div class="fgroup">
       <div class="flabel">Сортировка</div>
       <div class="seg" id="sortSeg">
-        <button data-sort="default">Обычная</button><button data-sort="time">Быстрые</button><button data-sort="alpha">А–Я</button>
+        <button data-sort="default">Обычная</button><button data-sort="time">Быстрые</button><button data-sort="kcal">По ккал</button><button data-sort="alpha">А–Я</button>
       </div>
     </div>
     <div class="fgroup">
@@ -264,8 +272,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
       <input type="range" id="time" min="15" max="240" step="15" value="240" aria-label="Максимальное время">
     </div>
     <div class="fgroup">
-      <div class="flabel">Сложность</div>
-      <div class="chips" id="diffs"></div>
+      <div class="flabel">Калорийность порции</div>
+      <div class="chips" id="kcalChips"></div>
     </div>
     <div class="fgroup">
       <div class="flabel">Особенности</div>
@@ -282,7 +290,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 
 <script src="recipes.js"></script>
 <script>
-const DIFFS = ['Легко', 'Средне', 'Сложно'];
+// Калорийность одной порции: [подпись, от, до)
+const KCAL = [['до 300 ккал', 0, 300], ['300–500', 300, 500], ['500–700', 500, 700], ['больше 700', 700, Infinity]];
 const MAX_TIME = 240;
 
 // ---------- Иконки ----------
@@ -291,7 +300,9 @@ const ICONS = {
   sliders: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  bars: '<path d="M6 19v-5M12 19V10M18 19V5"/>',
+  flame: '<path d="M12 21c-3.9 0-7-2.8-7-6.6 0-2.9 1.8-5 3.6-6.9.4 1.6 1.3 2.7 2.4 3.1C11 7 12.5 4.6 15 3c-.3 2.6.7 4.5 2.2 6.2A7.4 7.4 0 0 1 19 14.4C19 18.2 15.9 21 12 21Z"/>',
+  minus: '<path d="M5 12h14"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2c2 .8 3.5 2.9 3.5 5.8"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
   back: '<path d="M15 5l-7 7 7 7"/>',
@@ -323,7 +334,7 @@ try { localStorage.removeItem('userRecipes'); } catch {}   // своих рец�
 
 const ids = new Set(RECIPES.map(r => r.id));
 let favorites = new Set(store.get('favorites', []).filter(id => ids.has(id)));
-const freshFilters = () => ({ maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' });
+const freshFilters = () => ({ maxTime: MAX_TIME, kcal: new Set(), tags: new Set(), sort: 'default' });
 const state = Object.assign({ q: '', section: 'all', favOnly: false }, freshFilters());
 
 const $ = s => document.querySelector(s);
@@ -364,13 +375,13 @@ function card(r, i, eager) {
       <button class="fav ${on ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', on)}</button>
       <div class="body">
         <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('bars')}${esc(r.difficulty)}</span></div>
+        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('flame')}${r.kcal} ккал</span></div>
       </div>
     </article>`;
 }
 
 // ---------- Фильтрация ----------
-const filterCount = () => state.diffs.size + state.tags.size + (state.maxTime < MAX_TIME ? 1 : 0) + (state.sort !== 'default' ? 1 : 0);
+const filterCount = () => state.kcal.size + state.tags.size + (state.maxTime < MAX_TIME ? 1 : 0) + (state.sort !== 'default' ? 1 : 0);
 const narrowed = () => filterCount() > 0 || !!state.q.trim();
 
 // Поиск без учёта окончаний: «курица» найдёт «куриная», «яйца» — «яйцо»
@@ -380,12 +391,13 @@ const searchText = new Map(RECIPES.map(r => [r.id, norm([r.title, ...r.ingredien
 function matches(r) {
   const words = norm(state.q).split(/[\s,]+/).filter(Boolean).map(stem);
   return (state.maxTime >= MAX_TIME || r.time <= state.maxTime) &&
-    (!state.diffs.size || state.diffs.has(r.difficulty)) &&
+    (!state.kcal.size || KCAL.some(([l, lo, hi]) => state.kcal.has(l) && r.kcal >= lo && r.kcal < hi)) &&
     [...state.tags].every(t => r.tags.includes(t)) &&
     words.every(w => searchText.get(r.id).includes(w));
 }
 function sorted(list) {
   if (state.sort === 'time') return list.slice().sort((a, b) => a.time - b.time);
+  if (state.sort === 'kcal') return list.slice().sort((a, b) => a.kcal - b.kcal);
   if (state.sort === 'alpha') return list.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru'));
   return list;
 }
@@ -407,8 +419,8 @@ const ALL_TAGS = [...new Set(RECIPES.flatMap(r => r.tags))];
 function renderControls() {
   $('#sections').innerHTML = [{ id: 'all', title: 'Все' }, ...SECTIONS].map(s =>
     `<button class="sec-tab ${state.section === s.id ? 'on' : ''}" data-sec="${s.id}" aria-current="${state.section === s.id}">${icon(s.id)}${s.title}</button>`).join('');
-  const diffs = $('#diffs'); diffs.innerHTML = '';
-  DIFFS.forEach(d => diffs.append(chip(d, state.diffs.has(d), () => { toggle(state.diffs, d); update(); })));
+  const kc = $('#kcalChips'); kc.innerHTML = '';
+  KCAL.forEach(([l]) => kc.append(chip(l, state.kcal.has(l), () => { toggle(state.kcal, l); update(); })));
   const tc = $('#tagChips'); tc.innerHTML = '';
   ALL_TAGS.forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
   document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === state.sort));
@@ -545,16 +557,20 @@ function openRecipe(id) {
       <div class="tags">${r.sections.map(s => `<span class="tag sec">${esc(sectionById(s).title)}</span>`).join('')}${r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
       <div class="stats">
         <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>время</span></div>
-        <div class="stat">${icon('bars')}<b>${esc(r.difficulty)}</b><span>сложность</span></div>
-        <div class="stat">${icon('users')}<b>${r.servings}</b><span>${plural(r.servings, 'порция', 'порции', 'порций')}</span></div>
+        <div class="stat">${icon('flame')}<b>${r.kcal} ккал</b><span>на порцию</span></div>
+        <div class="stat portions">
+          <div class="stepper"><button id="sMinus" aria-label="Меньше порций">${icon('minus')}</button><b id="sN">${r.servings}</b><button id="sPlus" aria-label="Больше порций">${icon('plus')}</button></div>
+          <span id="sLbl">${plural(r.servings, 'порция', 'порции', 'порций')}</span>
+        </div>
       </div>
       ${swaps.some(s => s.pp)
         ? `<button class="pp-switch" id="vPP" role="switch" aria-checked="${ppOn}">${icon('leaf')}<span class="txt"><b>ПП-версия</b><small>${ppCount} ${plural(ppCount, 'замена', 'замены', 'замен')}: без глютена, лактозы и сахара</small></span><span class="knob"></span></button>`
         : `<div class="pp-done">${icon('leaf')}Этот рецепт уже подходит для правильного питания</div>`}
       <div class="sec-h"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
+      <div class="scaled" id="vScaled" hidden><span id="vScaledTxt"></span><button id="vScaleReset">Как в рецепте</button></div>
       <ul class="ing${ppOn ? ' pp' : ''}">${swaps.map((s, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${s.pp
-        ? `<span class="swap"><span class="hand">${esc(s.pp)}</span><s>${esc(s.name)}</s>${esc(s.rest)}</span>`
-        : esc(s.name + s.rest)}</span></label></li>`).join('')}</ul>
+        ? `<span class="swap"><span class="hand">${esc(s.pp)}</span><s>${esc(s.name)}</s><span class="q">${esc(s.rest)}</span></span>`
+        : `${esc(s.name)}<span class="q">${esc(s.rest)}</span>`}</span></label></li>`).join('')}</ul>
       ${ppCount ? `<div class="note pp-hint">${icon('leaf')}В шагах ниже используйте продукты, вписанные от руки</div>` : ''}
       <div class="sec-h"><h4>Приготовление</h4></div>
       <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
@@ -572,8 +588,23 @@ function openRecipe(id) {
     ppOn = !ppOn; ppOn ? ppIds.add(id) : ppIds.delete(id); store.set('pp', [...ppIds]);
     $('#vPP').setAttribute('aria-checked', ppOn); $('#viewPanel .ing').classList.toggle('pp', ppOn);
   };
+  // Калькулятор порций: пересчитываем только количества, отметки и ПП-замены остаются
+  let portions = r.servings;
+  const setPortions = n => {
+    portions = Math.min(24, Math.max(1, n));
+    const k = portions / r.servings, word = plural(portions, 'порция', 'порции', 'порций');
+    $('#sN').textContent = portions; $('#sLbl').textContent = word;
+    $('#sMinus').disabled = portions <= 1; $('#sPlus').disabled = portions >= 24;
+    $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k));
+    $('#vScaled').hidden = k === 1;
+    $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${word} · ≈ ${r.kcal * portions} ккал всего`;
+  };
+  $('#sMinus').onclick = () => setPortions(portions - 1);
+  $('#sPlus').onclick = () => setPortions(portions + 1);
+  $('#vScaleReset').onclick = () => setPortions(r.servings);
+  setPortions(portions);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
-    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + s.rest).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${plural(portions, 'порция', 'порции', 'порций')}, ≈ ${r.kcal} ккал на порцию\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
