@@ -1,6 +1,6 @@
 ﻿// Кэш для работы без интернета. При каждом выпуске новой версии увеличивайте VERSION —
 // тогда у пользователей появится предложение «Доступна новая версия — Обновить».
-const VERSION = 'recipes-v6';
+const VERSION = 'recipes-v7';
 const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
