@@ -1,10 +1,15 @@
-// Кэш для работы без интернета. При изменении файлов увеличьте версию.
-const VERSION = 'recipes-v1';
-const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
+// Кэш для работы без интернета. При каждом выпуске новой версии увеличивайте VERSION —
+// тогда у пользователей появится предложение «Доступна новая версия — Обновить».
+const VERSION = 'recipes-v2';
+const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest',
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // Первая установка активируется сразу, обновления ждут нажатия «Обновить»
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => { if (!self.registration.active) return self.skipWaiting(); }));
 });
+
+self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
@@ -29,12 +34,18 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Файлы приложения: сначала сеть (чтобы получать обновления), при офлайне — кэш
+  // Файлы приложения: из кэша своей версии, при промахе — из сети, офлайн — главная страница
   if (url.origin === location.origin) {
-    e.respondWith(fetch(req).then(res => {
-      const copy = res.clone();
-      caches.open(VERSION).then(c => c.put(req, copy));
-      return res;
-    }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
+    e.respondWith(caches.open(VERSION).then(async c => {
+      const hit = await c.match(req, { ignoreSearch: true });
+      if (hit) return hit;
+      try {
+        const res = await fetch(req);
+        if (res.ok) c.put(req, res.clone());
+        return res;
+      } catch {
+        return (await c.match('index.html')) || Response.error();
+      }
+    }));
   }
 });

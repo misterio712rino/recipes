@@ -5,183 +5,354 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Мои рецепты</title>
 <meta name="description" content="Рецепты с фотографиями и фильтрами">
-<meta name="theme-color" content="#e8603c">
+<meta name="theme-color" content="#faf6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#181311" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Рецепты">
 <style>
 :root {
-  --bg: #faf6f2; --card: #ffffff; --text: #2b211c; --muted: #8a7a70; --line: #ece3dc;
-  --accent: #e8603c; --accent-soft: #fde7df; --shadow: 0 2px 10px rgba(60,30,10,.08);
+  --bg: #faf6f2; --surface: #ffffff; --surface-2: #f3ece6; --text: #2b211c; --muted: #85746a; --line: #ebe2da;
+  --accent: #e4572e; --accent-ink: #ffffff; --accent-soft: #fde8e0; --danger: #c93a2a;
+  --shadow: 0 1px 2px rgba(60,30,10,.06), 0 6px 20px rgba(60,30,10,.07);
+  --radius: 18px; --nav-h: 62px;
+  --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #1a1513; --card: #241e1b; --text: #f3ebe6; --muted: #a8988e; --line: #3a302b;
-          --accent: #ff7a52; --accent-soft: #3d2620; --shadow: 0 2px 10px rgba(0,0,0,.4); }
+  :root { --bg: #181311; --surface: #231c19; --surface-2: #2d2421; --text: #f4ece7; --muted: #a8978d; --line: #362c28;
+          --accent: #ff7149; --accent-ink: #1b0f0b; --accent-soft: #3d2620; --danger: #ff6b5a;
+          --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text);
-       padding-bottom: env(safe-area-inset-bottom); -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text);
+       -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+body.lock { overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; background: none; border: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.i { width: 20px; height: 20px; flex: none; display: block; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-header { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: calc(12px + env(safe-area-inset-top)) 16px 8px; border-bottom: 1px solid var(--line); }
-.top { display: flex; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto; }
-h1 { font-size: 22px; margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 420px) { h1 { font-size: 19px; } #installBtn { padding: 0 10px; font-size: 14px; } }
-.icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 12px; height: 40px; min-width: 40px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-.icon-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.icon-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-.search { max-width: 1100px; margin: 10px auto 0; display: flex; gap: 8px; }
-.search input { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); padding: 0 14px; outline: none; }
+/* ---------- Шапка ---------- */
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent);
+         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(10px + var(--safe-t)) 16px 10px; border-bottom: 1px solid transparent; transition: border-color .2s; }
+header.scrolled { border-bottom-color: var(--line); }
+.wrap { max-width: 1100px; margin: 0 auto; }
+.top { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 12px;
+       background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: background .15s, transform .1s; }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; }
+.btn.danger { color: var(--danger); }
+.btn.block { width: 100%; height: 50px; font-size: 16px; border-radius: 14px; }
+.btn.round { width: 40px; padding: 0; border-radius: 50%; }
+
+.search-row { display: flex; gap: 8px; margin-top: 10px; }
+.search { flex: 1; position: relative; }
+.search .i { position: absolute; left: 12px; top: 12px; color: var(--muted); pointer-events: none; }
+.search input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 40px 0 40px; outline: none; font-size: 16px; -webkit-appearance: none; }
+.search input::-webkit-search-cancel-button { display: none; }
 .search input:focus { border-color: var(--accent); }
-.chips { max-width: 1100px; margin: 10px auto 0; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.search .clear { position: absolute; right: 6px; top: 6px; width: 32px; height: 32px; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--muted); }
+.search.has .clear { display: flex; }
+.filter-btn { position: relative; width: 44px; height: 44px; padding: 0; }
+.filter-btn.on { border-color: var(--accent); color: var(--accent); }
+.dot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; display: none; align-items: center; justify-content: center; padding: 0 5px; }
+.filter-btn.on .dot { display: flex; }
+
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 10px -16px 0; padding: 0 16px 2px; scroll-padding: 16px; }
 .chips::-webkit-scrollbar { display: none; }
-.chip { flex: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 14px; font-size: 14px; white-space: nowrap; }
-.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
+.chip.on { background: var(--text); border-color: var(--text); color: var(--bg); }
+.chips.wrapchips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
 
-#filters { max-width: 1100px; margin: 10px auto 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: none; gap: 14px; flex-direction: column; }
-#filters.open { display: flex; }
-#filters label.title { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
-#filters input[type=range] { width: 100%; accent-color: var(--accent); }
-.row { display: flex; gap: 8px; flex-wrap: wrap; }
-
-main { max-width: 1100px; margin: 0 auto; padding: 14px 16px 90px; }
-.count { color: var(--muted); font-size: 14px; margin: 2px 0 12px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-.card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer; position: relative; transition: transform .15s; }
+/* ---------- Список ---------- */
+main { padding: 6px 16px calc(var(--nav-h) + var(--safe-b) + 90px); }
+.count { color: var(--muted); font-size: 14px; margin: 6px 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.count button { color: var(--accent); font-size: 14px; font-weight: 500; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; position: relative;
+        transition: transform .15s; animation: rise .3s ease both; text-align: left; width: 100%; display: block; }
 .card:active { transform: scale(.98); }
-.photo { aspect-ratio: 4/3; width: 100%; object-fit: cover; display: block; background: var(--accent-soft); }
-.ph { aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, var(--accent-soft), var(--line)); }
-.card .body { padding: 10px 12px 12px; }
-.card h3 { margin: 0 0 6px; font-size: 16px; }
-.meta { display: flex; gap: 10px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
-.fav { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); font-size: 18px; display: flex; align-items: center; justify-content: center; }
-.badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 999px; }
-.empty { text-align: center; color: var(--muted); padding: 50px 10px; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+.media { position: relative; aspect-ratio: 4/3; background: var(--surface-2); overflow: hidden; }
+.media::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.25) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 1.3s infinite linear; }
+.media.ok::before, .media.fail::before { display: none; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.media img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .35s; }
+.media.ok img { opacity: 1; }
+.media.fail::after { content: attr(data-emoji); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, var(--accent-soft), var(--surface-2)); }
+.card .body { padding: 12px 14px 14px; }
+.card h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.25; letter-spacing: -.01em; }
+.meta { display: flex; gap: 14px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
+.meta span { display: inline-flex; align-items: center; gap: 5px; }
+.meta .i { width: 15px; height: 15px; }
+.fav { position: absolute; top: 10px; right: 10px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.92); color: #2b211c;
+       display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); z-index: 1; }
+.fav.on { color: #e4372e; }
+.fav:active { transform: scale(.9); }
+.badge { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 500; padding: 4px 9px; border-radius: 999px; backdrop-filter: blur(4px); }
+.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 56px 20px; }
+.empty .big { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--accent); }
+.empty .big .i { width: 28px; height: 28px; }
+.empty b { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
+.empty .btn { margin-top: 16px; }
 
-.fab { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 58px; height: 58px; border-radius: 50%; border: none; background: var(--accent); color: #fff; font-size: 30px; box-shadow: 0 6px 18px rgba(232,96,60,.45); z-index: 15; }
+/* ---------- Нижняя навигация ---------- */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
+           background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+           border-top: 1px solid var(--line); display: flex; justify-content: center; }
+nav.tabs .in { display: flex; width: 100%; max-width: 520px; }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 500; color: var(--muted); position: relative; }
+.tab .i { width: 23px; height: 23px; }
+.tab.on { color: var(--accent); }
+.tab .n { position: absolute; top: 7px; left: calc(50% + 8px); background: var(--accent); color: var(--accent-ink); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+.fab { position: fixed; right: 18px; bottom: calc(var(--nav-h) + var(--safe-b) + 16px); z-index: 19; height: 56px; padding: 0 20px 0 16px; border-radius: 28px;
+       background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px;
+       box-shadow: 0 8px 22px rgba(228,87,46,.42); transition: transform .15s; }
+.fab:active { transform: scale(.95); }
+.fab .i { width: 24px; height: 24px; }
 
-/* Модальные окна */
-.sheet { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; }
-.sheet.open { display: flex; }
-.panel { background: var(--bg); width: 100%; max-width: 720px; max-height: 94vh; overflow-y: auto; border-radius: 20px 20px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-@media (min-width: 760px) { .sheet { align-items: center; } .panel { border-radius: 20px; } }
-.panel .hero { position: relative; }
-.panel .hero img, .panel .hero .ph { aspect-ratio: 16/10; width: 100%; object-fit: cover; display: block; }
-.close { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; border: none; background: rgba(255,255,255,.92); color: #222; font-size: 20px; }
-.content { padding: 16px 18px; }
-.content h2 { margin: 0 0 8px; font-size: 24px; }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
-.stat b { display: block; font-size: 16px; }
-.stat span { font-size: 12px; color: var(--muted); }
-.content h4 { margin: 18px 0 8px; font-size: 17px; }
-.ing { list-style: none; padding: 0; margin: 0; }
-.ing li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--line); }
-.ing input { width: 20px; height: 20px; accent-color: var(--accent); margin: 1px 0 0; flex: none; }
-.ing li.done span { text-decoration: line-through; color: var(--muted); }
-.steps { padding: 0; margin: 0; list-style: none; counter-reset: s; }
-.steps li { counter-increment: s; position: relative; padding: 0 0 14px 40px; line-height: 1.5; }
-.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+/* ---------- Панели ---------- */
+.sheet { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; visibility: hidden; pointer-events: none; }
+.sheet::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; transition: opacity .25s; }
+.sheet.open { visibility: visible; pointer-events: auto; }
+.sheet.open::before { opacity: 1; }
+.panel { position: relative; background: var(--bg); width: 100%; max-width: 720px; max-height: 100%; height: 100%; overflow-y: auto; overscroll-behavior: contain;
+         transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); padding-bottom: calc(24px + var(--safe-b)); }
+.sheet.open .panel { transform: none; }
+@media (min-width: 760px) {
+  .sheet { align-items: center; padding: 24px; }
+  .panel { height: auto; max-height: calc(100vh - 48px); border-radius: 24px; transform: translateY(24px) scale(.98); opacity: 0; transition: transform .25s, opacity .25s; }
+  .sheet.open .panel { opacity: 1; }
+}
+.hero { position: relative; }
+.hero .media { aspect-ratio: 4/3; max-height: 56vh; width: 100%; }
+@media (min-width: 760px) { .hero .media { aspect-ratio: 16/10; } }
+.hero-bar { position: absolute; top: calc(12px + var(--safe-t)); left: 12px; right: 12px; display: flex; gap: 8px; z-index: 2; }
+.hero-bar .sp { flex: 1; }
+.glass { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92); color: #2b211c; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.glass.on { color: #e4372e; }
+.content { padding: 20px 18px 8px; max-width: 720px; margin: 0 auto; }
+.panel .content { margin-top: -22px; position: relative; background: var(--bg); border-radius: 22px 22px 0 0; }
+.content h2 { margin: 0 0 10px; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 4px 10px; border-radius: 999px; }
+.tag { font-size: 12px; font-weight: 500; background: var(--accent-soft); color: var(--accent); padding: 5px 10px; border-radius: 999px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 6px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; text-align: center; }
+.stat .i { margin: 0 auto 6px; color: var(--accent); }
+.stat b { display: block; font-size: 15px; }
+.stat span { font-size: 12px; color: var(--muted); }
+.sec { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 8px; }
+.sec h4 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+.sec button { color: var(--accent); font-size: 14px; font-weight: 500; }
+.ing { list-style: none; padding: 0; margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.ing label { display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; border-bottom: 1px solid var(--line); cursor: pointer; line-height: 1.4; }
+.ing li:last-child label { border-bottom: none; }
+.ing input { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin: 0; flex: none; border: 2px solid var(--line); border-radius: 7px; display: grid; place-content: center; transition: background .15s, border-color .15s; }
+.ing input::after { content: ""; width: 10px; height: 6px; border: solid var(--accent-ink); border-width: 0 0 2px 2px; transform: rotate(-45deg) translate(1px,-1px); opacity: 0; }
+.ing input:checked { background: var(--accent); border-color: var(--accent); }
+.ing input:checked::after { opacity: 1; }
+.ing input:checked + span { text-decoration: line-through; color: var(--muted); }
+.steps { padding: 0; margin: 0; list-style: none; counter-reset: s; }
+.steps li { counter-increment: s; position: relative; padding: 2px 0 18px 46px; line-height: 1.55; font-size: 16px; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.steps li:not(:last-child)::after { content: ""; position: absolute; left: 14px; top: 34px; bottom: 4px; width: 2px; background: var(--line); }
 .actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.actions .btn { flex: 1; }
+.note { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; margin-top: 14px; }
+.note .i { width: 16px; height: 16px; }
 
-form .field { margin-bottom: 12px; }
-form label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
-form input, form select, form textarea { width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 10px 12px; outline: none; }
-form textarea { min-height: 110px; resize: vertical; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.photo-pick { border: 2px dashed var(--line); border-radius: 14px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--muted); background: var(--card) center/cover no-repeat; cursor: pointer; text-align: center; padding: 10px; }
-.photo-pick.has span { display: none; }
+/* ---------- Фильтры (нижняя панель) ---------- */
+.sheet.compact .panel { height: auto; max-height: 88vh; border-radius: 22px 22px 0 0; }
+@media (min-width: 760px) { .sheet.compact .panel { border-radius: 24px; max-width: 520px; } }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
+.ph-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 0; position: sticky; top: 0; background: var(--bg); z-index: 2; padding-bottom: 10px; }
+.ph-head h2 { margin: 0; font-size: 21px; }
+.fgroup { padding: 8px 18px 10px; }
+.fgroup > label, .flabel { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.flabel b { color: var(--accent); font-weight: 600; }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
+.seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; }
+.seg button { flex: 1; height: 36px; border-radius: 9px; font-size: 14px; font-weight: 500; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.foot { display: flex; gap: 8px; padding: 14px 18px 0; }
+.foot .btn { flex: 1; height: 48px; }
 
-#toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 50; max-width: calc(100% - 32px); }
-#toast.show { opacity: 1; }
+/* ---------- Форма ---------- */
+form .field { margin-bottom: 14px; }
+form label.l { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+form .hint { font-weight: 400; color: var(--muted); }
+form input:not([type=file]), form select, form textarea { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; outline: none; font-size: 16px; -webkit-appearance: none; }
+form select { background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+form input:focus, form select:focus, form textarea:focus { border-color: var(--accent); }
+form textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.photo-pick { position: relative; border: 2px dashed var(--line); border-radius: 16px; aspect-ratio: 16/10; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; color: var(--muted); background: var(--surface) center/cover no-repeat; cursor: pointer; text-align: center; padding: 12px; font-size: 14px; width: 100%; }
+.photo-pick .i { width: 32px; height: 32px; color: var(--accent); }
+.photo-pick.has { border-style: solid; border-color: transparent; }
+.photo-pick.has > span, .photo-pick.has > .i { display: none; }
+.photo-del { position: absolute; top: 8px; right: 8px; display: none; }
+.photo-pick.has + .photo-del { display: flex; }
+.photo-wrap { position: relative; }
+.err { color: var(--danger); font-size: 13px; margin-top: 5px; display: none; }
+.field.bad .err { display: block; }
+.field.bad input, .field.bad textarea { border-color: var(--danger); }
+
+/* ---------- Уведомления ---------- */
+#toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 86px); transform: translate(-50%, 12px); background: #2b211c; color: #fff;
+         padding: 12px 16px; border-radius: 14px; font-size: 14px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 60;
+         max-width: calc(100% - 32px); display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+#toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+#toast button { color: #ffb59c; font-weight: 600; white-space: nowrap; }
+@media (prefers-color-scheme: dark) { #toast { background: #f4ece7; color: #1b0f0b; } #toast button { color: #c93a1a; } }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="top">
-    <h1>🍳 Мои рецепты</h1>
-    <button class="icon-btn primary" id="installBtn" hidden>📲 Установить</button>
-    <button class="icon-btn" id="favBtn" title="Избранное">♡</button>
-  </div>
-  <div class="search">
-    <input id="q" type="search" placeholder="Поиск по названию или ингредиенту…" autocomplete="off">
-    <button class="icon-btn" id="filterBtn" title="Фильтры" style="white-space:nowrap">⚙︎ Фильтры</button>
-  </div>
-  <div class="chips" id="cats"></div>
-  <div id="filters">
-    <div>
-      <label class="title">Время приготовления: до <b id="timeVal"></b></label>
-      <input type="range" id="time" min="15" max="240" step="15" value="240">
+<header id="hdr">
+  <div class="wrap">
+    <div class="top">
+      <h1 id="title">Рецепты</h1>
+      <button class="btn primary" id="installBtn" hidden></button>
     </div>
-    <div>
-      <label class="title">Сложность</label>
-      <div class="row" id="diffs"></div>
+    <div class="search-row">
+      <div class="search" id="searchBox">
+        <span data-i="search"></span>
+        <input id="q" type="search" placeholder="Блюдо или ингредиент" autocomplete="off" enterkeyhint="search" aria-label="Поиск">
+        <button class="clear" id="qClear" aria-label="Очистить поиск" data-i="x"></button>
+      </div>
+      <button class="btn filter-btn" id="filterBtn" aria-label="Фильтры"><span data-i="sliders"></span><span class="dot" id="filterDot"></span></button>
     </div>
-    <div>
-      <label class="title">Особенности</label>
-      <div class="row" id="tagChips"></div>
-    </div>
-    <div class="row"><button class="icon-btn" id="resetBtn">Сбросить фильтры</button></div>
+    <div class="chips" id="cats" role="tablist" aria-label="Категории"></div>
   </div>
 </header>
 
-<main>
-  <div class="count" id="count"></div>
+<main class="wrap">
+  <div class="count"><span id="count"></span><button id="resetLink" hidden>Сбросить фильтры</button></div>
   <div class="grid" id="grid"></div>
 </main>
 
-<button class="fab" id="addBtn" title="Добавить рецепт">+</button>
+<button class="fab" id="addBtn"><span data-i="plus"></span>Добавить</button>
+
+<nav class="tabs" aria-label="Разделы">
+  <div class="in">
+    <button class="tab" data-view="all"><span data-i="book"></span>Рецепты</button>
+    <button class="tab" data-view="fav"><span data-i="heart"></span>Избранное<span class="n" id="favN" hidden></span></button>
+    <button class="tab" data-view="mine"><span data-i="pen"></span>Мои</button>
+  </div>
+</nav>
 
 <!-- Просмотр рецепта -->
-<div class="sheet" id="viewSheet"><div class="panel" id="viewPanel"></div></div>
+<div class="sheet" id="viewSheet" role="dialog" aria-modal="true"><div class="panel" id="viewPanel"></div></div>
 
-<!-- Добавление рецепта -->
-<div class="sheet" id="addSheet">
+<!-- Фильтры -->
+<div class="sheet compact" id="filterSheet" role="dialog" aria-modal="true" aria-labelledby="fTitle">
   <div class="panel">
-    <div class="content">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <h2 id="formTitle">Новый рецепт</h2>
-        <button class="icon-btn" data-close>✕</button>
+    <div class="grab"></div>
+    <div class="ph-head"><h2 id="fTitle">Фильтры</h2><button class="btn round ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
+    <div class="fgroup">
+      <div class="flabel">Сортировка</div>
+      <div class="seg" id="sortSeg">
+        <button data-sort="default">Обычная</button><button data-sort="time">Быстрые</button><button data-sort="alpha">А–Я</button>
       </div>
-      <form id="form">
-        <div class="field">
-          <label>Фото</label>
-          <div class="photo-pick" id="photoPick"><span>📷 Нажмите, чтобы сделать фото или выбрать из галереи</span></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Время приготовления <b id="timeVal"></b></div>
+      <input type="range" id="time" min="15" max="240" step="15" value="240" aria-label="Максимальное время">
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Сложность</div>
+      <div class="chips wrapchips" id="diffs"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Особенности</div>
+      <div class="chips wrapchips" id="tagChips"></div>
+    </div>
+    <div class="foot">
+      <button class="btn" id="resetBtn">Сбросить</button>
+      <button class="btn primary" data-close id="applyBtn">Показать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Добавление / редактирование -->
+<div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+  <div class="panel">
+    <div class="ph-head" style="padding-top:calc(12px + var(--safe-t))">
+      <button class="btn round ghost" data-close aria-label="Закрыть" data-i="x"></button>
+      <h2 id="formTitle">Новый рецепт</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="content" style="padding-top:6px">
+      <form id="form" novalidate>
+        <div class="field photo-wrap">
+          <button type="button" class="photo-pick" id="photoPick"><span data-i="camera"></span><span>Сфотографируйте блюдо<br>или выберите фото из галереи</span></button>
+          <button type="button" class="glass photo-del" id="photoDel" aria-label="Убрать фото" data-i="trash"></button>
           <input type="file" id="photoInput" accept="image/*" hidden>
         </div>
-        <div class="field"><label>Название *</label><input name="title" required maxlength="80"></div>
-        <div class="grid3">
-          <div class="field"><label>Категория</label><select name="category" id="catSelect"></select></div>
-          <div class="field"><label>Время, мин</label><input name="time" type="number" min="1" value="30"></div>
-          <div class="field"><label>Порций</label><input name="servings" type="number" min="1" value="2"></div>
+        <div class="field" data-req><label class="l" for="fTitleIn">Название</label><input id="fTitleIn" name="title" maxlength="80" placeholder="Например, Бабушкины пирожки"><div class="err">Введите название</div></div>
+        <div class="grid2">
+          <div class="field"><label class="l" for="fCat">Категория</label><select id="fCat" name="category"></select></div>
+          <div class="field"><label class="l" for="fDiff">Сложность</label><select id="fDiff" name="difficulty"><option>Легко</option><option>Средне</option><option>Сложно</option></select></div>
+          <div class="field"><label class="l" for="fTime">Время, мин</label><input id="fTime" name="time" type="number" inputmode="numeric" min="1" value="30"></div>
+          <div class="field"><label class="l" for="fServ">Порций</label><input id="fServ" name="servings" type="number" inputmode="numeric" min="1" value="2"></div>
         </div>
-        <div class="field"><label>Сложность</label>
-          <select name="difficulty"><option>Легко</option><option>Средне</option><option>Сложно</option></select>
-        </div>
-        <div class="field"><label>Особенности (через запятую)</label><input name="tags" placeholder="Вегетарианское, Быстро"></div>
-        <div class="field"><label>Ингредиенты — каждый с новой строки *</label><textarea name="ingredients" required></textarea></div>
-        <div class="field"><label>Шаги приготовления — каждый с новой строки *</label><textarea name="steps" required></textarea></div>
-        <button class="icon-btn primary" style="width:100%;height:48px">Сохранить рецепт</button>
+        <div class="field"><label class="l">Особенности <span class="hint">— нажмите, чтобы выбрать</span></label><div class="chips wrapchips" id="formTags"></div></div>
+        <div class="field" data-req><label class="l" for="fIng">Ингредиенты <span class="hint">— каждый с новой строки</span></label><textarea id="fIng" name="ingredients" placeholder="Мука — 300 г&#10;Яйца — 2 шт."></textarea><div class="err">Добавьте хотя бы один ингредиент</div></div>
+        <div class="field" data-req><label class="l" for="fSteps">Приготовление <span class="hint">— каждый шаг с новой строки</span></label><textarea id="fSteps" name="steps" placeholder="Смешайте муку с яйцами.&#10;Замесите тесто."></textarea><div class="err">Опишите хотя бы один шаг</div></div>
+        <button class="btn primary block" id="saveBtn">Сохранить рецепт</button>
       </form>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastBtn" hidden></button></div>
 
 <script src="recipes.js"></script>
 <script>
 const CATEGORIES = ['Завтрак', 'Супы', 'Основные', 'Салаты', 'Десерты', 'Выпечка'];
 const DIFFS = ['Легко', 'Средне', 'Сложно'];
+const BASE_TAGS = ['Вегетарианское', 'Быстро', 'ПП', 'Мясное', 'Гриль'];
 const EMOJI = { 'Завтрак': '🍳', 'Супы': '🍲', 'Основные': '🍽️', 'Салаты': '🥗', 'Десерты': '🍰', 'Выпечка': '🥐' };
+const MAX_TIME = 240;
 
-// Хранилище (localStorage может быть недоступен — тогда работаем в памяти)
+// ---------- Иконки ----------
+const ICONS = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  sliders: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bars: '<path d="M6 19v-5M12 19V10M18 19V5"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2c2 .8 3.5 2.9 3.5 5.8"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  share: '<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  pen: '<path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  book: '<path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H19"/>',
+  camera: '<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H7l2-3h6l2 3h2.5A1.5 1.5 0 0 1 21 8.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><circle cx="12" cy="13" r="3.5"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  frown: '<circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/>'
+};
+const icon = (n, fill) => `<svg class="i" viewBox="0 0 24 24" fill="${fill ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+document.querySelectorAll('[data-i]').forEach(el => el.insertAdjacentHTML('afterbegin', icon(el.dataset.i)));
+document.querySelectorAll('span[data-i]').forEach(el => el.replaceWith(el.firstChild));
+
+// ---------- Хранилище (если недоступно — работаем в памяти) ----------
 const store = {
   get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
@@ -189,190 +360,321 @@ const store = {
 
 let userRecipes = store.get('userRecipes', []);
 let favorites = new Set(store.get('favorites', []));
-const state = { q: '', cat: 'Все', maxTime: 240, diffs: new Set(), tags: new Set(), favOnly: false };
+const fresh = () => ({ q: '', cat: 'Все', maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' });
+const state = Object.assign(fresh(), { view: 'all' });
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const allRecipes = () => [...userRecipes, ...BUILTIN_RECIPES];
+const byId = id => allRecipes().find(r => r.id === id);
 const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60) + ' мин' : ''}` : `${m} мин`;
+const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
 
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
-
-function photoHTML(r, cls) {
-  const ph = `<div class="ph ${cls}">${r.emoji || EMOJI[r.category] || '🍽️'}</div>`;
-  if (!r.image) return ph;
-  // При ошибке загрузки фото заменяем на заглушку с эмодзи
-  return `<img class="${cls}" src="${esc(r.image)}" alt="${esc(r.title)}" loading="lazy"
-           onerror="this.outerHTML='${ph.replace(/'/g, "\\'").replace(/"/g, '&quot;')}'">`;
+function toast(msg, action, onAction) {
+  const t = $('#toast'), b = $('#toastBtn');
+  $('#toastMsg').textContent = msg; b.hidden = !action; b.textContent = action || ''; b.onclick = () => { t.classList.remove('show'); onAction && onAction(); };
+  t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), action ? 6000 : 2200);
 }
 
-// ---------- Фильтры ----------
-function chip(label, on, onClick) {
-  const b = document.createElement('button');
-  b.className = 'chip' + (on ? ' on' : ''); b.textContent = label; b.onclick = onClick; return b;
+// Фото с плавным появлением; при ошибке — заглушка с эмодзи
+function media(r, eager) {
+  const emoji = esc(r.emoji || EMOJI[r.category] || '🍽️');
+  if (!r.image) return `<div class="media fail" data-emoji="${emoji}"></div>`;
+  return `<div class="media" data-emoji="${emoji}"><img src="${esc(r.image)}" alt="" ${eager ? '' : 'loading="lazy"'} decoding="async"
+    onload="this.parentNode.classList.add('ok')" onerror="this.parentNode.classList.add('fail');this.remove()"></div>`;
 }
-function renderControls() {
-  const cats = $('#cats'); cats.innerHTML = '';
-  ['Все', ...CATEGORIES].forEach(c => cats.append(chip((c === 'Все' ? '✨ ' : EMOJI[c] + ' ') + c, state.cat === c, () => { state.cat = c; update(); })));
-  const diffs = $('#diffs'); diffs.innerHTML = '';
-  DIFFS.forEach(d => diffs.append(chip(d, state.diffs.has(d), () => { toggle(state.diffs, d); update(); })));
-  const allTags = [...new Set(allRecipes().flatMap(r => r.tags || []))].sort();
-  const tc = $('#tagChips'); tc.innerHTML = '';
-  allTags.forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
-  $('#timeVal').textContent = state.maxTime >= 240 ? 'любое' : fmtTime(state.maxTime);
-  $('#favBtn').classList.toggle('active', state.favOnly);
-  $('#favBtn').textContent = state.favOnly ? '♥' : '♡';
-  const active = state.diffs.size + state.tags.size + (state.maxTime < 240 ? 1 : 0);
-  $('#filterBtn').textContent = '⚙︎ Фильтры' + (active ? ` (${active})` : '');
-  $('#filterBtn').classList.toggle('active', active > 0);
-}
-const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
+
+// ---------- Фильтрация ----------
+function activeFilters() { return state.diffs.size + state.tags.size + (state.maxTime < MAX_TIME ? 1 : 0) + (state.sort !== 'default' ? 1 : 0); }
 
 function filtered() {
   const q = state.q.trim().toLowerCase();
-  return allRecipes().filter(r =>
+  const list = allRecipes().filter(r =>
+    (state.view !== 'fav' || favorites.has(r.id)) &&
+    (state.view !== 'mine' || r.user) &&
     (state.cat === 'Все' || r.category === state.cat) &&
-    r.time <= (state.maxTime >= 240 ? Infinity : state.maxTime) &&
+    (state.maxTime >= MAX_TIME || r.time <= state.maxTime) &&
     (!state.diffs.size || state.diffs.has(r.difficulty)) &&
     [...state.tags].every(t => (r.tags || []).includes(t)) &&
-    (!state.favOnly || favorites.has(r.id)) &&
     (!q || r.title.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q)))
   );
+  if (state.sort === 'time') list.sort((a, b) => a.time - b.time);
+  if (state.sort === 'alpha') list.sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+  return list;
+}
+
+function chip(label, on, onClick) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip' + (on ? ' on' : ''); b.textContent = label; b.onclick = onClick; b.setAttribute('aria-pressed', on);
+  return b;
+}
+const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
+const allTags = () => [...new Set([...BASE_TAGS, ...allRecipes().flatMap(r => r.tags || [])])];
+
+function renderControls() {
+  const cats = $('#cats'); cats.innerHTML = '';
+  ['Все', ...CATEGORIES].forEach(c => cats.append(chip(c, state.cat === c, () => { state.cat = c; update(); })));
+  const diffs = $('#diffs'); diffs.innerHTML = '';
+  DIFFS.forEach(d => diffs.append(chip(d, state.diffs.has(d), () => { toggle(state.diffs, d); update(); })));
+  const tc = $('#tagChips'); tc.innerHTML = '';
+  allTags().forEach(t => tc.append(chip(t, state.tags.has(t), () => { toggle(state.tags, t); update(); })));
+  document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === state.sort));
+  $('#time').value = state.maxTime;
+  $('#timeVal').textContent = state.maxTime >= MAX_TIME ? 'любое' : 'до ' + fmtTime(state.maxTime);
+  const n = activeFilters();
+  $('#filterBtn').classList.toggle('on', n > 0); $('#filterDot').textContent = n;
+  $('#searchBox').classList.toggle('has', !!state.q);
+  $('#title').textContent = { all: 'Рецепты', fav: 'Избранное', mine: 'Мои рецепты' }[state.view];
+  document.querySelectorAll('.tab').forEach(t => { t.classList.toggle('on', t.dataset.view === state.view); t.setAttribute('aria-current', t.dataset.view === state.view ? 'page' : 'false'); });
+  $('#favN').hidden = !favorites.size; $('#favN').textContent = favorites.size;
+}
+
+function emptyState() {
+  const anyFilter = activeFilters() || state.q || state.cat !== 'Все';
+  if (state.view === 'fav' && !favorites.size)
+    return `<div class="empty"><div class="big">${icon('heart')}</div><b>Здесь пока пусто</b>Нажмите на сердечко у рецепта —<br>и он появится в избранном.</div>`;
+  if (state.view === 'mine' && !userRecipes.length)
+    return `<div class="empty"><div class="big">${icon('pen')}</div><b>Своих рецептов пока нет</b>Сохраните любимое блюдо с фото —<br>оно будет всегда под рукой.<br><button class="btn primary" onclick="openForm()">${icon('plus')}Добавить рецепт</button></div>`;
+  return `<div class="empty"><div class="big">${icon('frown')}</div><b>Ничего не нашлось</b>Попробуйте другой запрос${anyFilter ? '<br>или сбросьте фильтры.<br><button class="btn" onclick="resetAll()">Сбросить фильтры</button>' : '.'}</div>`;
 }
 
 function renderGrid() {
   const list = filtered();
-  $('#count').textContent = `Найдено рецептов: ${list.length}`;
+  const anyFilter = activeFilters() || state.q || state.cat !== 'Все';
+  $('#count').textContent = list.length ? `${list.length} ${plural(list.length, 'рецепт', 'рецепта', 'рецептов')}` : '';
+  $('#resetLink').hidden = !anyFilter || !list.length;
+  $('#applyBtn').textContent = list.length ? `Показать ${list.length}` : 'Ничего не найдено';
   const grid = $('#grid');
-  if (!list.length) { grid.innerHTML = `<div class="empty" style="grid-column:1/-1">😕 Ничего не найдено.<br>Попробуйте изменить фильтры.</div>`; return; }
-  grid.innerHTML = list.map(r => `
-    <div class="card" data-id="${esc(r.id)}">
-      ${photoHTML(r, 'photo')}
+  if (!list.length) { grid.innerHTML = emptyState(); return; }
+  grid.innerHTML = list.map((r, i) => `
+    <article class="card" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i, 8) * 30}ms" tabindex="0" aria-label="${esc(r.title)}">
+      ${media(r, i < 4)}
       ${r.user ? '<span class="badge">Мой рецепт</span>' : ''}
-      <button class="fav" data-fav="${esc(r.id)}" aria-label="В избранное">${favorites.has(r.id) ? '❤️' : '🤍'}</button>
+      <button class="fav ${favorites.has(r.id) ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${favorites.has(r.id) ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', favorites.has(r.id))}</button>
       <div class="body">
         <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>⏱ ${fmtTime(r.time)}</span><span>📊 ${esc(r.difficulty)}</span><span>${EMOJI[r.category] || ''} ${esc(r.category)}</span></div>
+        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('bars')}${esc(r.difficulty)}</span><span>${esc(r.category)}</span></div>
       </div>
-    </div>`).join('');
+    </article>`).join('');
 }
 
 function update() { renderControls(); renderGrid(); }
+function resetAll() { Object.assign(state, fresh()); $('#q').value = ''; update(); }
 
 $('#grid').addEventListener('click', e => {
   const fav = e.target.closest('[data-fav]');
   if (fav) { e.stopPropagation(); toggleFav(fav.dataset.fav); return; }
   const card = e.target.closest('.card'); if (card) openRecipe(card.dataset.id);
 });
+$('#grid').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openRecipe(e.target.dataset.id); });
+
 function toggleFav(id) {
   toggle(favorites, id); store.set('favorites', [...favorites]);
+  if (navigator.vibrate) navigator.vibrate(10);
   toast(favorites.has(id) ? 'Добавлено в избранное' : 'Убрано из избранного');
-  renderGrid();
-  if ($('#viewSheet').classList.contains('open')) openRecipe(id);
+  update();
+  if ($('#viewSheet').classList.contains('open')) refreshFavButton(id);
 }
 
-$('#q').addEventListener('input', e => { state.q = e.target.value; renderGrid(); });
+let qTimer;
+$('#q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = e.target.value; renderControls(); renderGrid(); }, 120); });
+$('#qClear').onclick = () => { $('#q').value = ''; state.q = ''; update(); $('#q').focus(); };
 $('#time').addEventListener('input', e => { state.maxTime = +e.target.value; update(); });
-$('#filterBtn').onclick = () => $('#filters').classList.toggle('open');
-$('#favBtn').onclick = () => { state.favOnly = !state.favOnly; update(); };
-$('#resetBtn').onclick = () => { Object.assign(state, { cat: 'Все', maxTime: 240, diffs: new Set(), tags: new Set(), favOnly: false }); $('#time').value = 240; update(); };
+$('#sortSeg').onclick = e => { const b = e.target.closest('[data-sort]'); if (b) { state.sort = b.dataset.sort; update(); } };
+$('#filterBtn').onclick = () => openSheet('#filterSheet');
+$('#resetBtn').onclick = () => { Object.assign(state, { maxTime: MAX_TIME, diffs: new Set(), tags: new Set(), sort: 'default' }); update(); };
+$('#resetLink').onclick = resetAll;
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => { state.view = t.dataset.view; update(); scrollTo({ top: 0, behavior: 'smooth' }); });
+addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 4), { passive: true });
+
+// ---------- Панели и кнопка «Назад» на телефоне ----------
+const openSheets = () => [...document.querySelectorAll('.sheet.open')];
+function openSheet(sel) {
+  const el = $(sel);
+  openSheets().forEach(s => s !== el && s.classList.remove('open'));
+  el.classList.add('open'); document.body.classList.add('lock');
+  if (!(history.state && history.state.sheet)) history.pushState({ sheet: 1 }, '');
+}
+function closeSheets(fromHistory) {
+  if (!openSheets().length) return;
+  openSheets().forEach(s => s.classList.remove('open'));
+  document.body.classList.remove('lock'); releaseWake();
+  if (!fromHistory && history.state && history.state.sheet) history.back();
+}
+addEventListener('popstate', () => closeSheets(true));
+document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+
+// Экран не гаснет, пока открыт рецепт (если телефон поддерживает)
+let wake = null;
+async function keepAwake() { try { wake = await navigator.wakeLock.request('screen'); } catch { wake = null; } }
+function releaseWake() { if (wake) { wake.release().catch(() => {}); wake = null; } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && $('#viewSheet').classList.contains('open')) keepAwake(); });
 
 // ---------- Просмотр рецепта ----------
+function refreshFavButton(id) {
+  const on = favorites.has(id), b = $('#vFav'); if (!b) return;
+  b.classList.toggle('on', on); b.innerHTML = icon('heart', on); b.setAttribute('aria-label', on ? 'Убрать из избранного' : 'В избранное');
+}
 function openRecipe(id) {
-  const r = allRecipes().find(x => x.id === id); if (!r) return;
+  const r = byId(id); if (!r) return;
   const checked = new Set(store.get('checked:' + id, []));
+  const canShare = !!navigator.share;
   $('#viewPanel').innerHTML = `
-    <div class="hero">${photoHTML(r, '')}<button class="close" data-close>✕</button></div>
+    <div class="hero">
+      ${media(r, true)}
+      <div class="hero-bar">
+        <button class="glass" data-close aria-label="Назад">${icon('back')}</button><span class="sp"></span>
+        ${canShare ? `<button class="glass" id="vShare" aria-label="Поделиться">${icon('share')}</button>` : ''}
+        <button class="glass" id="vFav"></button>
+      </div>
+    </div>
     <div class="content">
       <h2>${esc(r.title)}</h2>
       <div class="tags">${[r.category, ...(r.tags || [])].map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
       <div class="stats">
-        <div class="stat"><b>${fmtTime(r.time)}</b><span>время</span></div>
-        <div class="stat"><b>${esc(r.difficulty)}</b><span>сложность</span></div>
-        <div class="stat"><b>${r.servings}</b><span>порций</span></div>
+        <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>время</span></div>
+        <div class="stat">${icon('bars')}<b>${esc(r.difficulty)}</b><span>сложность</span></div>
+        <div class="stat">${icon('users')}<b>${r.servings}</b><span>${plural(r.servings, 'порция', 'порции', 'порций')}</span></div>
       </div>
-      <h4>🧺 Ингредиенты</h4>
-      <ul class="ing">${r.ingredients.map((i, n) => `<li class="${checked.has(n) ? 'done' : ''}"><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${esc(i)}</span></li>`).join('')}</ul>
-      <h4>👩‍🍳 Приготовление</h4>
+      <div class="sec"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
+      <ul class="ing">${r.ingredients.map((i, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${esc(i)}</span></label></li>`).join('')}</ul>
+      <div class="sec"><h4>Приготовление</h4></div>
       <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-      <div class="actions">
-        <button class="icon-btn ${favorites.has(r.id) ? 'active' : ''}" id="vFav">${favorites.has(r.id) ? '❤️ В избранном' : '🤍 В избранное'}</button>
-        ${navigator.share ? '<button class="icon-btn" id="vShare">📤 Поделиться</button>' : ''}
-        ${r.user ? '<button class="icon-btn" id="vDel">🗑 Удалить</button>' : ''}
-      </div>
+      ${r.user ? `<div class="actions"><button class="btn" id="vEdit">${icon('edit')}Изменить</button><button class="btn danger" id="vDel">${icon('trash')}Удалить</button></div>` : ''}
+      ${'wakeLock' in navigator ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
     </div>`;
+  refreshFavButton(id);
+  const syncUncheck = () => { $('#vUncheck').hidden = !checked.size; };
   $('#viewPanel').querySelectorAll('.ing input').forEach(cb => cb.onchange = () => {
     const n = +cb.dataset.n; cb.checked ? checked.add(n) : checked.delete(n);
-    cb.closest('li').classList.toggle('done', cb.checked); store.set('checked:' + id, [...checked]);
+    store.set('checked:' + id, [...checked]); syncUncheck();
   });
+  $('#vUncheck').onclick = () => { checked.clear(); store.set('checked:' + id, []); $('#viewPanel').querySelectorAll('.ing input').forEach(c => c.checked = false); syncUncheck(); };
   $('#vFav').onclick = () => toggleFav(r.id);
-  if ($('#vShare')) $('#vShare').onclick = () => navigator.share({ title: r.title,
+  if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title,
     text: `${r.title}\n\nИнгредиенты:\n${r.ingredients.map(i => '• ' + i).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
-  if ($('#vDel')) $('#vDel').onclick = () => {
-    if (!confirm('Удалить рецепт «' + r.title + '»?')) return;
-    userRecipes = userRecipes.filter(x => x.id !== r.id); store.set('userRecipes', userRecipes);
-    closeSheets(); update(); toast('Рецепт удалён');
-  };
-  $('#viewSheet').classList.add('open');
+  if (r.user) {
+    $('#vEdit').onclick = () => openForm(r);
+    $('#vDel').onclick = () => {
+      if (!confirm(`Удалить рецепт «${r.title}»?`)) return;
+      const idx = userRecipes.findIndex(x => x.id === r.id), removed = userRecipes[idx];
+      userRecipes.splice(idx, 1); store.set('userRecipes', userRecipes); closeSheets(); update();
+      toast('Рецепт удалён', 'Вернуть', () => { userRecipes.splice(idx, 0, removed); store.set('userRecipes', userRecipes); update(); });
+    };
+  }
+  openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
+  keepAwake();
 }
 
-function closeSheets() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); }
-document.addEventListener('click', e => {
-  if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+// ---------- Добавление и редактирование ----------
+let pickedPhoto = null, editingId = null, formTags = new Set();
+$('#fCat').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join('');
+$('#addBtn').onclick = () => openForm();
 
-// ---------- Добавление рецепта ----------
-let pickedPhoto = null;
-$('#catSelect').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join('');
-$('#addBtn').onclick = () => { $('#form').reset(); pickedPhoto = null; setPickPreview(null); $('#addSheet').classList.add('open'); };
-$('#photoPick').onclick = () => $('#photoInput').click();
-function setPickPreview(url) {
+function renderFormTags() {
+  const box = $('#formTags'); box.innerHTML = '';
+  allTags().forEach(t => box.append(chip(t, formTags.has(t), () => { toggle(formTags, t); renderFormTags(); })));
+}
+function setPhoto(url) {
+  pickedPhoto = url;
   const p = $('#photoPick'); p.style.backgroundImage = url ? `url("${url}")` : ''; p.classList.toggle('has', !!url);
 }
-// Сжимаем фото до 900px, чтобы оно поместилось в память телефона
+function openForm(r) {
+  const f = $('#form'); f.reset(); f.querySelectorAll('.field').forEach(x => x.classList.remove('bad'));
+  editingId = r ? r.id : null;
+  $('#formTitle').textContent = r ? 'Изменить рецепт' : 'Новый рецепт';
+  $('#saveBtn').textContent = r ? 'Сохранить изменения' : 'Сохранить рецепт';
+  formTags = new Set(r ? r.tags : []);
+  setPhoto(r ? r.image : null);
+  if (r) {
+    f.title.value = r.title; f.category.value = r.category; f.difficulty.value = r.difficulty;
+    f.time.value = r.time; f.servings.value = r.servings;
+    f.ingredients.value = r.ingredients.join('\n'); f.steps.value = r.steps.join('\n');
+  } else if (state.cat !== 'Все') f.category.value = state.cat;
+  renderFormTags();
+  openSheet('#formSheet');
+  $('#formSheet .panel').scrollTop = 0;
+}
+$('#photoPick').onclick = () => $('#photoInput').click();
+$('#photoDel').onclick = () => setPhoto(null);
+// Сжимаем фото до 1000 px, чтобы оно поместилось в память телефона
 $('#photoInput').onchange = e => {
-  const file = e.target.files[0]; if (!file) return;
-  const img = new Image();
+  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+  const img = new Image(), url = URL.createObjectURL(file);
   img.onload = () => {
-    const scale = Math.min(1, 900 / Math.max(img.width, img.height));
-    const c = document.createElement('canvas'); c.width = img.width * scale; c.height = img.height * scale;
+    const scale = Math.min(1, 1000 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    pickedPhoto = c.toDataURL('image/jpeg', 0.75); setPickPreview(pickedPhoto); URL.revokeObjectURL(img.src);
+    setPhoto(c.toDataURL('image/jpeg', 0.78)); URL.revokeObjectURL(url);
   };
-  img.src = URL.createObjectURL(file);
+  img.onerror = () => { toast('Не удалось открыть фото'); URL.revokeObjectURL(url); };
+  img.src = url;
 };
+$('#form').addEventListener('input', e => e.target.closest('.field')?.classList.remove('bad'));
 $('#form').onsubmit = e => {
   e.preventDefault();
-  const f = new FormData(e.target);
-  const lines = k => f.get(k).split('\n').map(s => s.trim()).filter(Boolean);
-  const r = {
-    id: 'u' + Date.now(), user: true, title: f.get('title').trim(), category: f.get('category'),
-    time: Math.max(1, +f.get('time') || 30), servings: Math.max(1, +f.get('servings') || 1), difficulty: f.get('difficulty'),
-    tags: f.get('tags').split(',').map(s => s.trim()).filter(Boolean),
-    ingredients: lines('ingredients'), steps: lines('steps'), image: pickedPhoto
+  const f = e.target;
+  const lines = v => v.split('\n').map(s => s.replace(/^[\s•\-–—*\d.)]+/, '').trim()).filter(Boolean);
+  const data = {
+    title: f.title.value.trim(), category: f.category.value, difficulty: f.difficulty.value,
+    time: Math.max(1, Math.round(+f.time.value) || 30), servings: Math.max(1, Math.round(+f.servings.value) || 1),
+    tags: [...formTags], ingredients: lines(f.ingredients.value), steps: lines(f.steps.value), image: pickedPhoto
   };
-  userRecipes.unshift(r);
-  if (!store.set('userRecipes', userRecipes)) { toast('⚠️ Не хватает памяти — рецепт сохранён только до перезапуска'); }
-  else toast('Рецепт сохранён ✅');
-  closeSheets(); update();
+  const bad = [[f.title, !data.title], [f.ingredients, !data.ingredients.length], [f.steps, !data.steps.length]].filter(([, b]) => b);
+  bad.forEach(([el]) => el.closest('.field').classList.add('bad'));
+  if (bad.length) { bad[0][0].focus(); return; }
+
+  const prev = userRecipes.slice();
+  let id;
+  if (editingId) { id = editingId; const i = userRecipes.findIndex(x => x.id === id); userRecipes[i] = { ...userRecipes[i], ...data }; }
+  else { id = 'u' + Date.now(); userRecipes.unshift({ id, user: true, ...data }); }
+  if (!store.set('userRecipes', userRecipes)) {
+    userRecipes = prev;
+    toast('Память телефона заполнена — попробуйте фото поменьше или удалите старые рецепты'); return;
+  }
+  update();
+  toast(editingId ? 'Изменения сохранены' : 'Рецепт сохранён');
+  if (editingId) openRecipe(id); else closeSheets();
 };
 
-// ---------- Установка на телефон (PWA) ----------
+// ---------- Установка на телефон ----------
 let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; });
-window.addEventListener('appinstalled', () => { $('#installBtn').hidden = true; toast('Приложение установлено 🎉'); });
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+$('#installBtn').innerHTML = icon('download') + 'Установить';
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; });
+addEventListener('appinstalled', () => { $('#installBtn').hidden = true; toast('Приложение установлено'); });
 if (isIOS && !isStandalone) $('#installBtn').hidden = false;
 $('#installBtn').onclick = async () => {
   if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('#installBtn').hidden = true; }
-  else if (isIOS) alert('Чтобы установить на iPhone:\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой) в Safari\n2. Выберите «На экран „Домой“»');
+  else if (isIOS) alert('Как установить на iPhone:\n\n1. Нажмите кнопку «Поделиться» внизу Safari (квадрат со стрелкой)\n2. Выберите «На экран „Домой“»\n3. Нажмите «Добавить»');
 };
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 
+// ---------- Работа без интернета и обновления ----------
+if ('serviceWorker' in navigator) {
+  addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js');
+      const offer = w => toast('Доступна новая версия', 'Обновить', () => w.postMessage('skipWaiting'));
+      if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w); });
+      });
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloaded) { reloaded = true; location.reload(); } });
+    } catch {}
+  });
+}
+
+// Быстрые действия с иконки приложения (долгое нажатие на Android)
+const startHash = location.hash;
+if (startHash) history.replaceState(null, '', location.pathname);
+if (startHash === '#fav') state.view = 'fav';
 update();
+if (startHash === '#add') openForm();
 </script>
 </body>
 </html>
