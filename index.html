@@ -370,10 +370,19 @@ const byId = id => allRecipes().find(r => r.id === id);
 const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60) + ' мин' : ''}` : `${m} мин`;
 const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
 
-function toast(msg, action, onAction) {
+// Постоянное сообщение (предложение обновиться) не исчезает само;
+// обычные сообщения показываются поверх и затем возвращают его на экран
+let sticky = null;
+function toast(msg, action, onAction, isSticky) {
   const t = $('#toast'), b = $('#toastBtn');
-  $('#toastMsg').textContent = msg; b.hidden = !action; b.textContent = action || ''; b.onclick = () => { t.classList.remove('show'); onAction && onAction(); };
-  t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), action ? 6000 : 2200);
+  if (isSticky) sticky = { msg, action, onAction };
+  $('#toastMsg').textContent = msg; b.hidden = !action; b.textContent = action || '';
+  b.onclick = () => { t.classList.remove('show'); if (isSticky) sticky = null; onAction && onAction(); };
+  t.classList.add('show'); clearTimeout(t._h);
+  if (!isSticky) t._h = setTimeout(() => {
+    t.classList.remove('show');
+    if (sticky) t._h = setTimeout(() => toast(sticky.msg, sticky.action, sticky.onAction, true), 300);
+  }, action ? 6000 : 2200);
 }
 
 // Фото с плавным появлением; при ошибке — заглушка с эмодзи
@@ -657,7 +666,7 @@ if ('serviceWorker' in navigator) {
   addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('sw.js');
-      const offer = w => toast('Доступна новая версия', 'Обновить', () => w.postMessage('skipWaiting'));
+      const offer = w => toast('Доступна новая версия', 'Обновить', () => w.postMessage('skipWaiting'), true);
       if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
       reg.addEventListener('updatefound', () => {
         const w = reg.installing;
