@@ -63,6 +63,11 @@ h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 
 /* значки в шапке — без рамок, как на бумаге */
 .top .btn.sq { border-color: transparent; background: transparent; border-radius: 50%; color: var(--paper-ink); }
 .top .btn.sq.on { background: var(--accent-soft); color: var(--accent); }
+/* подпись под значком: сразу понятно, что делает кнопка */
+.top .btn.lbl { width: auto; min-width: 44px; height: 46px; padding: 0 3px; flex-direction: column; gap: 1px; border-radius: 12px; }
+.top .btn.lbl small { font-size: 10.5px; font-weight: 500; line-height: 1; color: var(--muted); }
+.top .btn.lbl.on small { color: var(--accent); }
+.top .btn.lbl .dot { top: -2px; right: 2px; }
 .hdr-orn { display: flex; align-items: center; gap: 12px; color: var(--paper-line); font-size: 11px; margin: 4px 0 8px; }
 .hdr-orn::before, .hdr-orn::after { content: ""; flex: 1; height: 1px; background: currentColor; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 14px; border-radius: 12px;
@@ -135,7 +140,19 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 .media.ok img { opacity: 1; }
 .media.fail::after { content: attr(data-emoji); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, var(--accent-soft), var(--surface-2)); }
 .card .body { padding: 12px 14px 14px; }
-.card h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.25; letter-spacing: -.01em; }
+.card h3 { margin: 0 0 8px; font-family: var(--serif); font-size: 21px; font-weight: 600; line-height: 1.12; }
+/* На телефоне — две колонки: видно 4–6 блюд сразу */
+@media (max-width: 560px) {
+  main { padding-left: 14px; padding-right: 14px; }
+  .grid { grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+  .card { border-radius: 16px; }
+  .card .body { padding: 9px 10px 11px; }
+  .card h3 { font-size: 18px; margin-bottom: 6px; }
+  .card .meta { gap: 4px 9px; font-size: 12px; }
+  .card .meta .i { width: 13px; height: 13px; }
+  .card .fav { top: 7px; right: 7px; width: 32px; height: 32px; }
+  .card .fav .i { width: 17px; height: 17px; }
+}
 .meta { display: flex; gap: 14px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
 .meta span { display: inline-flex; align-items: center; gap: 5px; }
 .meta .i { width: 15px; height: 15px; }
@@ -170,7 +187,7 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 .glass { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92); color: #2b211c; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
 .glass.on { color: #e4372e; }
 .content { padding: 20px 18px 8px; max-width: 720px; margin: -22px auto 0; position: relative; background: var(--bg); border-radius: 22px 22px 0 0; }
-.content h2 { margin: 0 0 10px; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
+.content h2 { margin: 0 0 10px; font-family: var(--serif); font-size: 34px; font-weight: 600; line-height: 1.05; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 12px; font-weight: 500; background: var(--surface-2); color: var(--muted); padding: 5px 10px; border-radius: 999px; }
 .tag.sec { background: var(--accent-soft); color: var(--accent); }
@@ -188,7 +205,7 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 .scaled { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: -2px 0 10px; font-size: 13px; color: var(--muted); }
 .scaled button { color: var(--accent); font-size: 13px; font-weight: 500; white-space: nowrap; }
 .sec-h { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 8px; }
-.sec-h h4 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+.sec-h h4 { margin: 0; font-family: var(--serif); font-size: 25px; font-weight: 600; }
 .sec-h button { color: var(--accent); font-size: 14px; font-weight: 500; }
 .ing { list-style: none; padding: 0; margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .ing label { display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; border-bottom: 1px solid var(--line); cursor: pointer; line-height: 1.4; }
@@ -234,7 +251,7 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 @media (min-width: 760px) { .sheet.compact .panel { border-radius: 24px; max-width: 520px; } }
 .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 8px auto 0; }
 .ph-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; position: sticky; top: 0; background: var(--bg); z-index: 2; }
-.ph-head h2 { margin: 0; font-size: 21px; }
+.ph-head h2 { margin: 0; font-family: var(--serif); font-size: 27px; font-weight: 600; }
 .fgroup { padding: 8px 18px 10px; }
 .flabel { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
 .flabel b { color: var(--accent); font-weight: 600; }
@@ -299,8 +316,8 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .cover-orn { width: 150px; margin: 0; }
 .menu:not(.font-ready) .cover-face > * { opacity: 0; }
 .cover-face > * { transition: opacity .4s; }
-.cover-hint { position: absolute; bottom: calc(56px + var(--safe-b)); font-size: 14px; color: var(--muted); animation: hint 2.4s ease-in-out infinite; }
-@keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+.cover-hint { position: absolute; bottom: calc(56px + var(--safe-b)); font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--paper-ink); animation: hint 2.4s ease-in-out infinite; }
+@keyframes hint { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 
 /* «Рецепт дня» и «Продолжить» на развороте меню */
 .mi-special { margin: -6px 0 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
@@ -359,6 +376,31 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .fr-row .miss { color: var(--accent); }
 .fr-empty { color: var(--muted); text-align: center; padding: 22px 6px; font-size: 14px; }
 
+/* Отзывы и предложения */
+.fb-body, .fb-done { padding: 0 18px calc(18px + var(--safe-b)); }
+.fb-types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 14px; }
+.fb-types button { height: 46px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); font-size: 15px; font-weight: 500; }
+.fb-types button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.fb-stars { display: flex; justify-content: center; gap: 4px; margin: 0 0 12px; }
+.fb-stars button { font-size: 34px; line-height: 1; width: 48px; height: 48px; color: var(--line); transition: transform .1s, color .15s; }
+.fb-stars button.on { color: #f2a93b; }
+.fb-stars button:active { transform: scale(.85); }
+.fb-recipe { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+.fb-recipe b { color: var(--text); font-weight: 600; }
+.fb-body textarea, .fb-body input { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  padding: 12px 14px; font: inherit; font-size: 16px; outline: none; -webkit-appearance: none; }
+.fb-body textarea { resize: vertical; min-height: 120px; line-height: 1.45; margin-bottom: 8px; }
+.fb-body textarea:focus, .fb-body input:focus { border-color: var(--accent); }
+.fb-send { width: 100%; height: 50px; margin-top: 14px; font-size: 16px; }
+.fb-note { font-size: 13px; color: var(--muted); text-align: center; margin: 10px 0 0; min-height: 1em; }
+.fb-note.err { color: var(--accent); }
+.fb-done { text-align: center; padding-top: 18px; }
+.fb-done .big { width: 72px; height: 72px; margin: 0 auto 12px; border-radius: 50%; background: var(--pp-soft); color: var(--pp); display: flex; align-items: center; justify-content: center; font-size: 34px; }
+.fb-done h3 { font-family: var(--serif); font-size: 30px; margin: 0 0 6px; }
+.fb-done p { color: var(--muted); margin: 0 0 18px; line-height: 1.45; }
+.fb-done .btn { width: 100%; height: 48px; }
+.fb-link { display: block; margin: 18px auto 4px; font-size: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
 /* Список покупок */
 .cart-body { padding: 0 18px calc(18px + var(--safe-b)); }
 .cart-recipes { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 14px; }
@@ -416,12 +458,12 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 <header id="hdr">
   <div class="wrap">
     <div class="top">
-      <button class="btn sq" id="menuBtn" aria-label="Меню" data-i="book"></button>
+      <button class="btn sq lbl" id="menuBtn" aria-label="Меню"><span data-i="book"></span><small>Меню</small></button>
       <h1 id="title">Рецепты</h1>
       <button class="btn primary" id="installBtn" hidden></button>
-      <button class="btn sq" id="diceBtn" aria-label="Что приготовить? Случайное блюдо" data-i="dice"></button>
-      <button class="btn sq" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><span class="dot" id="cartN" hidden></span></button>
-      <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
+      <button class="btn sq lbl" id="diceBtn" aria-label="Что приготовить? Случайное блюдо"><span data-i="dice"></span><small>Идея</small></button>
+      <button class="btn sq lbl" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><small>Покупки</small><span class="dot" id="cartN" hidden></span></button>
+      <button class="btn sq lbl" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
     <div class="hdr-orn" aria-hidden="true">✦</div>
     <div class="search-row">
@@ -510,6 +552,35 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
     <div class="foot">
       <button class="btn" id="resetBtn">Сбросить</button>
       <button class="btn primary" data-close id="applyBtn">Показать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Отзывы и предложения: открывается поверх рецепта, если оставлены из него -->
+<div class="sheet compact" id="fbSheet" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="ph-head"><h2 id="fbTitle">Отзывы и предложения</h2><button class="btn sq ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
+    <form class="fb-body" id="fbForm" novalidate>
+      <p class="fr-lead">Расскажите, что нравится, чего не хватает или что исправить. Мы читаем каждое сообщение.</p>
+      <div class="fb-types" id="fbTypes" role="radiogroup" aria-label="О чём сообщение">
+        <button type="button" data-type="Отзыв" role="radio">💬 Отзыв</button><button type="button" data-type="Идея" role="radio">💡 Идея</button>
+        <button type="button" data-type="Ошибка" role="radio">🐞 Ошибка</button><button type="button" data-type="Хочу рецепт" role="radio">🍲 Хочу рецепт</button>
+      </div>
+      <div class="fb-stars" id="fbStars" role="radiogroup" aria-label="Оценка приложения">
+        <button type="button" data-star="1" role="radio" aria-label="1 из 5">★</button><button type="button" data-star="2" role="radio" aria-label="2 из 5">★</button><button type="button" data-star="3" role="radio" aria-label="3 из 5">★</button><button type="button" data-star="4" role="radio" aria-label="4 из 5">★</button><button type="button" data-star="5" role="radio" aria-label="5 из 5">★</button>
+      </div>
+      <div class="fb-recipe" id="fbRecipe" hidden>Рецепт: <b></b></div>
+      <textarea id="fbText" rows="5" maxlength="2000" aria-label="Сообщение"></textarea>
+      <input id="fbContact" type="text" maxlength="120" autocomplete="name" placeholder="Имя или контакт для ответа — необязательно" aria-label="Имя или контакт">
+      <button class="btn primary fb-send" id="fbSend" type="submit">Отправить</button>
+      <p class="fb-note" id="fbNote" aria-live="polite"></p>
+    </form>
+    <div class="fb-done" id="fbDone" hidden>
+      <div class="big">✓</div>
+      <h3>Спасибо!</h3>
+      <p id="fbDoneTxt"></p>
+      <button class="btn primary" data-close>Готово</button>
     </div>
   </div>
 </div>
@@ -685,7 +756,7 @@ function renderControls() {
   const n = filterCount();
   $('#filterBtn').classList.toggle('on', n > 0); $('#filterDot').hidden = !n; $('#filterDot').textContent = n;
   $('#searchBox').classList.toggle('has', !!state.q);
-  $('#favBtn').innerHTML = icon('heart', state.favOnly) + `<span class="dot" id="favN" ${favorites.size ? '' : 'hidden'}>${favorites.size}</span>`;
+  $('#favBtn').innerHTML = icon('heart', state.favOnly) + '<small>Избранное</small>' + `<span class="dot" id="favN" ${favorites.size ? '' : 'hidden'}>${favorites.size}</span>`;
   $('#favBtn').classList.toggle('on', state.favOnly);
   $('#favBtn').setAttribute('aria-pressed', state.favOnly);
   $('#title').textContent = state.favOnly ? 'Избранное' : state.section === 'all' ? 'Рецепты' : sectionById(state.section).title;
@@ -754,26 +825,43 @@ addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY 
 
 // ---------- Панели и кнопка «Назад» на телефоне ----------
 const openSheets = () => [...document.querySelectorAll('.sheet.open')];
-function openSheet(sel) {
-  const el = $(sel);
-  openSheets().forEach(s => s !== el && s.classList.remove('open'));
+// stack — открыть поверх уже открытой панели (отзыв из рецепта): «Назад» и «Закрыть» уберут только её
+function openSheet(sel, stack) {
+  const el = $(sel), under = openSheets().filter(s => s !== el);
+  if (stack && under.length) {
+    el.dataset.stacked = 1; el.classList.add('open');
+    history.pushState({ sheet: 1, stack: 1 }, '');
+    return;
+  }
+  under.forEach(s => s.classList.remove('open'));
   el.classList.add('open'); document.body.classList.add('lock');
   if (!(history.state && history.state.sheet)) history.pushState({ sheet: 1 }, '');
 }
+// skipPop: свой же history.back() не должен закрыть ещё и панель под верхней
+let skipPop = false;
+function closeStacked(fromHistory) {
+  const s = document.querySelector('.sheet.open[data-stacked]'); if (!s) return false;
+  s.classList.remove('open'); delete s.dataset.stacked;
+  if (!fromHistory && history.state && history.state.stack) { skipPop = true; history.back(); }
+  return true;
+}
 function closeSheets(fromHistory) {
   if (!openSheets().length) return;
-  openSheets().forEach(s => s.classList.remove('open'));
+  openSheets().forEach(s => { s.classList.remove('open'); delete s.dataset.stacked; });
   document.body.classList.remove('lock'); releaseWake();
   if (!fromHistory && history.state && history.state.sheet) history.back();
 }
+const closeTop = () => closeStacked() || closeSheets();
 // «Назад»: сначала закрываются панели, а из списка рецептов возвращаемся в меню
 // Режим готовки лежит поверх рецепта: «Назад» сначала закрывает только его
 addEventListener('popstate', () => {
+  if (skipPop) { skipPop = false; return; }
   if (!$('#cook').hidden) { closeCook(true); return; }
+  if (closeStacked(true)) return;
   closeSheets(true); if (!history.state) showMenu(false);
 });
-document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#cook').hidden) closeCook(); else closeSheets(); } });
+document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeTop(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#cook').hidden) closeCook(); else closeTop(); } });
 
 // Экран не гаснет, пока открыт рецепт (если телефон поддерживает)
 let wake = null;
@@ -833,7 +921,9 @@ function openRecipe(id) {
       <ol class="steps" id="vSteps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
       <div class="act-row"><button class="btn primary" id="vCook">${icon('play')}Начать готовить</button></div>
       ${showWakeHint ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
+      ${feedbackOn ? '<button class="fb-link" id="vFb">Нашли неточность в рецепте? Напишите нам</button>' : ''}
     </div>`;
+  if (feedbackOn) $('#vFb').onclick = () => openFeedback({ type: 'Ошибка', recipe: r.title });
   refreshFavButton(id);
   const syncUncheck = () => { $('#vUncheck').hidden = !checked.size; };
   $('#viewPanel').querySelectorAll('.ing input').forEach(cb => cb.onchange = () => {
@@ -861,7 +951,7 @@ function openRecipe(id) {
     const k = portions / r.servings, word = unitWord(r, portions);
     $('#sN').textContent = portions; $('#sLbl').textContent = word;
     $('#sMinus').disabled = portions <= 1; $('#sPlus').disabled = portions >= 24;
-    $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k));
+    $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k * (ppOn ? swaps[n].kq : 1)));
     $('#vSteps').querySelectorAll('li').forEach((li, n) => li.textContent = scaleSteps(r.steps[n], k));
     $('#vScaled').hidden = k === 1;
     $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${unitWord(r, portions, true)} · ≈ ${kcalNow() * portions} ккал всего`;
@@ -880,7 +970,7 @@ function openRecipe(id) {
   $('#vScaleReset').onclick = () => setPortions(r.servings);
   setPortions(portions);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
-    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${unitWord(r, portions)}, ≈ ${kcalNow()} ккал ${unitOf(r)[4]}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${scaleSteps(s, portions / r.servings)}`).join('\n')}` }).catch(() => {});
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${unitWord(r, portions)}, ≈ ${kcalNow()} ккал ${unitOf(r)[4]}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings * (ppOn ? s.kq : 1))).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${scaleSteps(s, portions / r.servings)}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
@@ -894,7 +984,7 @@ function cartItems() {
   for (const c of cart) {
     const r = byId(c.id), k = c.portions / r.servings;
     for (const s of r.ingredients.map(ppSwap)) {
-      const name = c.pp && s.pp ? s.pp : s.name, rest = scaleQty(s.rest, k), q = parseQty(rest);
+      const name = c.pp && s.pp ? s.pp : s.name, rest = scaleQty(s.rest, k * (c.pp ? s.kq : 1)), q = parseQty(rest);
       const key = productKey(name) + '|' + (q ? q.key : rest);
       const it = items.get(key) || { key, name, n: 0, q, rest, from: new Set() };
       if (q) it.n += q.n;
@@ -1264,13 +1354,113 @@ if (!calm) $('#viewPanel').addEventListener('scroll', e => {
   img.style.transform = `translate3d(0, ${st * .45}px, 0) scale(${1 + st / 3000})`;
 }, { passive: true });
 
+// ---------- Фото для работы без интернета ----------
+// Фото попадают в память телефона через service worker (кэш 'images'). Все сразу — это несколько мегабайт,
+// поэтому сами качаем только по Wi-Fi, а по мобильному интернету — когда человек нажмёт пункт в меню
+const canSavePhotos = 'serviceWorker' in navigator && 'caches' in window;
+const PHOTO_MB = .115;   // средний размер одного фото
+let photoSaving = false;
+async function missingPhotos() {
+  const c = await caches.open('images'), out = [];
+  for (const r of RECIPES) if (r.image) { const u = new URL(r.image, location.href).href; if (!(await c.match(u))) out.push(u); }
+  return out;
+}
+async function savePhotos(onStep) {
+  if (photoSaving) return false;
+  photoSaving = true;
+  try {
+    const miss = await missingPhotos(); let done = 0;
+    for (const u of miss) {
+      if (!navigator.onLine) return false;
+      await fetch(u).catch(() => {});   // кладёт в память service worker
+      onStep && onStep(++done, miss.length);
+    }
+    return !(await missingPhotos()).length;
+  } finally { photoSaving = false; }
+}
+async function savePhotosNow() {
+  if (!navigator.serviceWorker.controller) { toast('Откройте приложение ещё раз — и тогда сохраните фото'); return; }
+  toast('Сохраняю фото…');
+  const ok = await savePhotos((n, all) => { if (n % 5 === 0 || n === all) toast(`Сохраняю фото: ${n} из ${all}`); });
+  toast(ok ? 'Готово: все фото доступны без интернета' : 'Не всё сохранилось — попробуйте позже, с интернетом');
+  refreshMenuIfOpen();
+}
+
+// ---------- Отзывы и предложения: уходят в Google Форму, ответы собираются в Google Таблице ----------
+// form — адрес формы; entry — номера полей формы (entry.123…). Пока адреса нет, отзывы в приложении не показываются
+const FEEDBACK = {
+  form: '',
+  entry: { type: '', rating: '', text: '', contact: '', recipe: '', device: '' }
+};
+const feedbackOn = !!FEEDBACK.form;
+const FB_HINTS = {
+  'Отзыв': 'Что понравилось, а что — нет?', 'Идея': 'Что добавить или изменить в приложении?',
+  'Ошибка': 'Где ошибка и что не так?', 'Хочу рецепт': 'Какое блюдо добавить? Можно несколько'
+};
+let fb = { type: 'Отзыв', rating: 0, recipe: '' };
+function renderFeedbackForm() {
+  document.querySelectorAll('#fbTypes [data-type]').forEach(b => { const on = b.dataset.type === fb.type; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  $('#fbStars').hidden = fb.type !== 'Отзыв';
+  document.querySelectorAll('#fbStars [data-star]').forEach(b => { b.classList.toggle('on', +b.dataset.star <= fb.rating); b.setAttribute('aria-checked', +b.dataset.star === fb.rating); });
+  $('#fbRecipe').hidden = !fb.recipe; $('#fbRecipe b').textContent = fb.recipe;
+  $('#fbText').placeholder = FB_HINTS[fb.type];
+}
+function openFeedback(opts = {}) {
+  fb = { type: opts.type || 'Отзыв', rating: 0, recipe: opts.recipe || '' };
+  $('#fbForm').hidden = false; $('#fbDone').hidden = true;
+  $('#fbText').value = store.get('fbDraft', ''); $('#fbContact').value = store.get('fbContact', '');
+  $('#fbNote').textContent = ''; $('#fbNote').classList.remove('err');
+  renderFeedbackForm();
+  openSheet('#fbSheet', true);
+}
+$('#fbTypes').onclick = e => { const b = e.target.closest('[data-type]'); if (b) { fb.type = b.dataset.type; renderFeedbackForm(); } };
+$('#fbStars').onclick = e => { const b = e.target.closest('[data-star]'); if (b) { fb.rating = +b.dataset.star; renderFeedbackForm(); } };
+$('#fbText').addEventListener('input', e => store.set('fbDraft', e.target.value));   // черновик не пропадёт, если окно закрыть
+// Отправка в Google Форму. Ответ формы прочитать нельзя (другой сайт), поэтому успех — это отсутствие ошибки сети.
+// Без интернета сообщение ждёт в очереди и уходит само, когда связь появится
+async function sendFeedback(msg) {
+  const body = new URLSearchParams();
+  for (const [k, id] of Object.entries(FEEDBACK.entry)) if (id && msg[k]) body.append(id, msg[k]);
+  await fetch(FEEDBACK.form.replace(/\/viewform.*$/, '/formResponse'), { method: 'POST', mode: 'no-cors', body });
+}
+async function flushFeedback() {
+  if (!feedbackOn || !navigator.onLine) return;
+  const queue = store.get('fbQueue', []); if (!queue.length) return;
+  const left = [];
+  for (const m of queue) { try { await sendFeedback(m); } catch { left.push(m); } }
+  store.set('fbQueue', left);
+}
+$('#fbForm').onsubmit = async e => {
+  e.preventDefault();
+  const text = $('#fbText').value.trim(), note = $('#fbNote');
+  if (text.length < 3) { note.textContent = 'Напишите хотя бы пару слов'; note.classList.add('err'); $('#fbText').focus(); return; }
+  const contact = $('#fbContact').value.trim(); store.set('fbContact', contact);
+  const msg = { type: fb.type, rating: fb.type === 'Отзыв' && fb.rating ? String(fb.rating) : '', text, contact, recipe: fb.recipe,
+    device: `${isIOS ? 'iPhone/iPad' : /android/i.test(navigator.userAgent) ? 'Android' : 'компьютер'}, ${isStandalone ? 'приложение' : 'браузер'}` };
+  $('#fbSend').disabled = true; note.classList.remove('err'); note.textContent = 'Отправляю…';
+  let sent = false;
+  if (navigator.onLine) { try { await sendFeedback(msg); sent = true; } catch {} }
+  if (!sent) store.set('fbQueue', [...store.get('fbQueue', []), msg]);
+  $('#fbSend').disabled = false; store.set('fbDraft', '');
+  $('#fbDoneTxt').textContent = sent ? 'Сообщение отправлено. Спасибо, что помогаете сделать приложение лучше!'
+    : 'Сейчас нет интернета — сообщение сохранено и отправится само, как только связь появится.';
+  $('#fbForm').hidden = true; $('#fbDone').hidden = false;
+};
+
 // ---------- Главный экран-меню ----------
 // В истории браузера меню — нижняя запись, список рецептов — запись { app: 1 } поверх него
 function renderMenu() {
   const item = (go, name, n) => `<button class="mi-item${go === 'season' ? ' season' : ''}" data-go="${go}"><span>${go === 'season' ? SEASONS[SEASON].emoji + ' ' : ''}${esc(name)}</span><span class="dots"></span><span class="n">${n}</span></button>`;
   $('#menuList').innerHTML = SECTIONS.map(s => item(s.id, s.title, RECIPES.filter(r => r.sections.includes(s.id)).length)).join('');
   $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size) + item('cart', 'Список покупок', cart.length) +
-    (canInstall() ? item('install', 'Установить приложение', '') : '');
+    (feedbackOn ? item('feedback', 'Отзывы и предложения', '✉') : '') +
+    (canInstall() ? item('install', 'Установить приложение', '') : '') +
+    (canSavePhotos ? item('photos', 'Фото без интернета', '') : '');
+  // пункт «Фото без интернета» виден, только пока какие-то фото не сохранены в телефоне
+  if (canSavePhotos) {
+    const b = $('#menuExtra [data-go="photos"]'); b.hidden = true;
+    missingPhotos().then(m => { if (!m.length || photoSaving) return; b.hidden = false; b.querySelector('.n').textContent = `≈ ${Math.max(1, Math.round(m.length * PHOTO_MB))} МБ`; });
+  }
   // «Рецепт дня» меняется раз в сутки; «Продолжить» — последний открытый рецепт
   const d = new Date(), today = RECIPES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % RECIPES.length];
   const last = byId(store.get('lastRecipe', ''));
@@ -1306,6 +1496,8 @@ $('#menu').addEventListener('click', e => {
   const dice = e.target.closest('[data-dice]'); if (dice) { leaveMenu('all'); openDice(dice.dataset.dice); return; }
   const b = e.target.closest('[data-go]'); if (!b) return;
   if (b.dataset.go === 'install') { $('#installBtn').onclick(); return; }   // окно установки поверх меню
+  if (b.dataset.go === 'photos') { b.hidden = true; savePhotosNow(); return; }   // качаем, не уходя из меню
+  if (b.dataset.go === 'feedback') { leaveMenu('all'); openFeedback(); return; }
   if (b.dataset.go === 'cart') { leaveMenu('all'); openCart(); } else leaveMenu(b.dataset.go);
 });
 $('#menuBtn').onclick = () => { if (history.state && history.state.app) history.back(); else showMenu(false); };
@@ -1321,17 +1513,11 @@ update();
 centerTab();
 syncCartDot();
 
-// Все фото заранее в память телефона — чтобы приложение целиком работало без интернета.
-// При каждом запуске докачиваем только то, чего в памяти нет (телефон мог её почистить); не в режиме экономии трафика
-if ('serviceWorker' in navigator && 'caches' in window && !(navigator.connection && navigator.connection.saveData)) {
-  navigator.serviceWorker.ready.then(() => setTimeout(async () => {
-    const c = await caches.open('images');
-    for (const r of RECIPES) {
-      if (!r.image || !navigator.onLine) continue;
-      if (!(await c.match(new URL(r.image, location.href).href))) await fetch(r.image).catch(() => {});   // кладёт в память service worker
-    }
-  }, 4000));
-}
+// Сами докачиваем фото только по Wi-Fi (телефон мог почистить память); по мобильному интернету — кнопкой в меню
+const onWifi = () => { const c = navigator.connection; return !!c && !c.saveData && (c.type === 'wifi' || c.type === 'ethernet'); };
+if (canSavePhotos) navigator.serviceWorker.ready.then(() => setTimeout(() => { if (onWifi()) savePhotos(); }, 4000));
+flushFeedback();
+addEventListener('online', flushFeedback);
 </script>
 </body>
 </html>
