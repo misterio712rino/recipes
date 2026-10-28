@@ -154,7 +154,7 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; text-align: center; }
 .stat .i { margin: 0 auto 6px; color: var(--accent); }
 .stat b { display: block; font-size: 15px; }
-.stat span { font-size: 12px; color: var(--muted); }
+.stat > span { font-size: 12px; color: var(--muted); }
 .stat.portions { padding: 8px 4px 12px; }
 .stepper { display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; }
 .stepper b { min-width: 26px; font-size: 18px; }
@@ -194,7 +194,7 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .ing:not(.pp) + .pp-hint { display: none; }
 .pp-hint .i { color: var(--pp); }
 .stat .swap .hand { margin: -4px 0 1px; transform-origin: center; font-size: 22px; }
-.stat .swap s { font-weight: 500; font-size: 13px; }
+.pp .stat .swap s { font-weight: 500; font-size: 13px; }
 @keyframes strike { from { background-size: 0 2px; } }
 @keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @media (prefers-reduced-motion: reduce) { .pp .swap .hand, .pp .swap s { animation: none; } }
@@ -345,6 +345,9 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const byId = id => RECIPES.find(r => r.id === id);
 const sectionById = id => SECTIONS.find(s => s.id === id);
 const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60) + ' мин' : ''}` : `${m} мин`;
+// Полное время с ожиданием (холодильник, маринование) — по нему фильтруем и сортируем
+const totalTime = r => r.time + (r.wait || 0);
+const fmtWait = r => r.wait ? `+ ${fmtTime(r.wait)} ${r.waitFor}` : '';
 const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
 const recipesWord = n => `${n} ${plural(n, 'рецепт', 'рецепта', 'рецептов')}`;
 
@@ -378,7 +381,7 @@ function card(r, i, eager) {
       <button class="fav ${on ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', on)}</button>
       <div class="body">
         <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}</span><span>${icon('flame')}${r.kcal} ккал</span></div>
+        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}${r.wait ? ' + ' + fmtTime(r.wait) : ''}</span><span>${icon('flame')}${r.kcal} ккал</span></div>
       </div>
     </article>`;
 }
@@ -390,16 +393,16 @@ const narrowed = () => filterCount() > 0 || !!state.q.trim();
 // Поиск без учёта окончаний: «курица» найдёт «куриная», «яйца» — «яйцо»
 const norm = s => s.toLowerCase().replace(/ё/g, 'е');
 const stem = w => w.length >= 6 ? w.slice(0, -2) : w.length >= 4 ? w.slice(0, -1) : w;
-const searchText = new Map(RECIPES.map(r => [r.id, norm([r.title, ...r.ingredients].join(' '))]));
+const searchText = new Map(RECIPES.map(r => [r.id, norm([r.title, ...r.ingredients, ...r.tags, ...r.sections.map(s => sectionById(s).title), r.keywords || ''].join(' '))]));
 function matches(r) {
   const words = norm(state.q).split(/[\s,]+/).filter(Boolean).map(stem);
-  return (state.maxTime >= MAX_TIME || r.time <= state.maxTime) &&
+  return (state.maxTime >= MAX_TIME || totalTime(r) <= state.maxTime) &&
     (!state.kcal.size || KCAL.some(([l, lo, hi]) => state.kcal.has(l) && r.kcal >= lo && r.kcal < hi)) &&
     [...state.tags].every(t => r.tags.includes(t)) &&
     words.every(w => searchText.get(r.id).includes(w));
 }
 function sorted(list) {
-  if (state.sort === 'time') return list.slice().sort((a, b) => a.time - b.time);
+  if (state.sort === 'time') return list.slice().sort((a, b) => totalTime(a) - totalTime(b));
   if (state.sort === 'kcal') return list.slice().sort((a, b) => a.kcal - b.kcal);
   if (state.sort === 'alpha') return list.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru'));
   return list;
@@ -560,7 +563,7 @@ function openRecipe(id) {
       <h2>${esc(r.title)}</h2>
       <div class="tags">${r.sections.map(s => `<span class="tag sec">${esc(sectionById(s).title)}</span>`).join('')}${r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
       <div class="stats${ppOn ? ' pp' : ''}">
-        <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>время</span></div>
+        <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>${r.wait ? esc(fmtWait(r)) : 'время'}</span></div>
         <div class="stat">${icon('flame')}<b>${ppK !== r.kcal
           ? `<span class="swap"><span class="hand">${ppK} ккал</span><s>${r.kcal} ккал</s></span>`
           : `${r.kcal} ккал`}</b><span>на порцию</span></div>
@@ -571,7 +574,7 @@ function openRecipe(id) {
       </div>
       ${swaps.some(s => s.pp)
         ? `<button class="pp-switch" id="vPP" role="switch" aria-checked="${ppOn}">${icon('leaf')}<span class="txt"><b>ПП-версия</b><small>${ppCount} ${plural(ppCount, 'замена', 'замены', 'замен')}: без глютена, лактозы и сахара</small></span><span class="knob"></span></button>`
-        : `<div class="pp-done">${icon('leaf')}Этот рецепт уже подходит для правильного питания</div>`}
+        : `<div class="pp-done">${icon('leaf')}Без глютена, лактозы и сахара — замены не нужны</div>`}
       <div class="sec-h"><h4>Ингредиенты</h4><button id="vUncheck" ${checked.size ? '' : 'hidden'}>Снять отметки</button></div>
       <div class="scaled" id="vScaled" hidden><span id="vScaledTxt"></span><button id="vScaleReset">Как в рецепте</button></div>
       <ul class="ing${ppOn ? ' pp' : ''}">${swaps.map((s, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${s.pp
