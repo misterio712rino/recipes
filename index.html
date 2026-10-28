@@ -266,7 +266,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
     <div class="fgroup">
       <div class="flabel">Сортировка</div>
       <div class="seg" id="sortSeg">
-        <button data-sort="default">Обычная</button><button data-sort="time">Быстрые</button><button data-sort="kcal">По ккал</button><button data-sort="alpha">А–Я</button>
+        <button data-sort="default">Обычная</button><button data-sort="time">Быстрые</button><button data-sort="kcal">По ккал</button>
       </div>
     </div>
     <div class="fgroup">
@@ -404,7 +404,6 @@ function matches(r) {
 function sorted(list) {
   if (state.sort === 'time') return list.slice().sort((a, b) => totalTime(a) - totalTime(b));
   if (state.sort === 'kcal') return list.slice().sort((a, b) => a.kcal - b.kcal);
-  if (state.sort === 'alpha') return list.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru'));
   return list;
 }
 function filtered() {
@@ -546,6 +545,9 @@ function openRecipe(id) {
   const r = byId(id); if (!r) return;
   const checked = new Set(store.get('checked:' + id, []));
   const canShare = !!navigator.share;
+  // Подсказку про экран показываем только в первом открытом рецепте
+  const showWakeHint = 'wakeLock' in navigator && !store.get('wakeHint', false);
+  if (showWakeHint) store.set('wakeHint', true);
   const swaps = r.ingredients.map(ppSwap), ppCount = swaps.filter(s => s.pp).length;
   const ppIds = new Set(store.get('pp', []));
   let ppOn = ppIds.has(id) && ppCount > 0;
@@ -583,7 +585,7 @@ function openRecipe(id) {
       ${ppCount ? `<div class="note pp-hint">${icon('leaf')}В шагах ниже используйте продукты, вписанные от руки</div>` : ''}
       <div class="sec-h"><h4>Приготовление</h4></div>
       <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-      ${'wakeLock' in navigator ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
+      ${showWakeHint ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
     </div>`;
   refreshFavButton(id);
   const syncUncheck = () => { $('#vUncheck').hidden = !checked.size; };
