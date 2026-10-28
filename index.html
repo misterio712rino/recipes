@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap&subset=cyrillic">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap&subset=cyrillic">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -229,14 +229,77 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 #toast button { color: #ffb59c; font-weight: 600; white-space: nowrap; }
 @media (prefers-color-scheme: dark) { #toast { background: #f4ece7; color: #1b0f0b; } #toast button { color: #c93a1a; } }
 
+/* ---------- Главный экран-меню: обложка открывается, как настоящее меню ---------- */
+:root { --paper: #fbf8f2; --paper-2: #f2ece2; --paper-ink: #2b211c; --paper-line: #d9cdbd; --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; --paper-glow: rgba(255,255,255,.55); }
+@media (prefers-color-scheme: dark) { :root { --paper: #221c18; --paper-2: #1a1512; --paper-ink: #f1e7dc; --paper-line: #4a3d34; --paper-glow: rgba(255,240,225,.035); } }
+html:has(body.menu-on), body.menu-on { overflow: hidden; }
+.menu { position: fixed; inset: 0; z-index: 50; background: var(--paper-2); perspective: 2000px; transition: opacity .35s, transform .35s; }
+.menu.leaving { opacity: 0; transform: scale(1.03); pointer-events: none; }
+.menu-inside { position: absolute; inset: 0; overflow-y: auto; background: var(--paper); color: var(--paper-ink);
+  padding: calc(40px + var(--safe-t)) 28px calc(32px + var(--safe-b)); display: flex; flex-direction: column; align-items: center; }
+/* тень от обложки, которая уходит, пока меню открывается */
+.menu-inside::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(40,20,5,.28), rgba(40,20,5,.05) 40%, transparent); opacity: 1; transition: opacity 1.1s ease; }
+.menu.opened .menu-inside::before { opacity: 0; }
+.menu:not(.opened) .menu-inside { overflow: hidden; }
+.mi-page { width: 100%; max-width: 420px; margin: auto 0; }
+.mi-kicker { font-family: var(--serif); font-style: italic; font-size: 18px; text-align: center; color: var(--muted); }
+.mi-title { font-family: var(--serif); font-weight: 600; font-size: 52px; line-height: 1; text-align: center; margin: 4px 0 6px; letter-spacing: .02em; }
+.mi-orn { display: flex; align-items: center; gap: 12px; color: var(--paper-line); margin: 0 auto 22px; max-width: 220px; font-size: 14px; }
+.mi-orn::before, .mi-orn::after { content: ""; flex: 1; height: 1px; background: currentColor; }
+.mi-list { display: flex; flex-direction: column; }
+.mi-item { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 11px 2px; font-family: var(--serif); font-size: 25px; font-weight: 500; color: var(--paper-ink); text-align: left; }
+.mi-item .dots { flex: 1; border-bottom: 2px dotted var(--paper-line); transform: translateY(-6px); min-width: 20px; }
+.mi-item .n { font-size: 20px; font-style: italic; color: var(--muted); }
+.mi-item:active { color: var(--accent); }
+.mi-extra { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--paper-line); }
+.mi-extra .mi-item { font-size: 21px; padding: 9px 2px; }
+/* строки разворота проявляются по очереди, когда обложка открылась */
+.mi-page > * { opacity: 0; transform: translateY(6px); transition: opacity .45s ease, transform .45s ease; }
+.menu.opened .mi-page > * { opacity: 1; transform: none; }
+.menu.opened .mi-page > :nth-child(2) { transition-delay: .55s; } .menu.opened .mi-page > :nth-child(3) { transition-delay: .6s; }
+.menu.opened .mi-page > :nth-child(4) { transition-delay: .7s; } .menu.opened .mi-page > :nth-child(5) { transition-delay: .85s; }
+.menu.instant .mi-page > *, .menu.instant .menu-inside::before { transition: none !important; }
+/* обложка: лицевая сторона и оборот, поворачивается вокруг левого края */
+.menu-cover { position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d; transition: transform 1.15s cubic-bezier(.55,.05,.2,1), visibility 0s 1.15s; }
+.menu.opened .menu-cover { transform: rotateY(-178deg); visibility: hidden; }
+.menu.instant .menu-cover { transition: none; }
+.cover-face, .cover-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.cover-face { background: radial-gradient(ellipse at 30% 20%, var(--paper-glow), transparent 60%), var(--paper); color: var(--paper-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset -10px 0 24px -14px rgba(60,30,10,.35); }
+.cover-face::before { content: ""; position: absolute; inset: calc(18px + var(--safe-t)) 18px calc(18px + var(--safe-b)); border: 1px solid var(--paper-line); outline: 1px solid var(--paper-line); outline-offset: -6px; pointer-events: none; }
+.cover-back { background: var(--paper-2); transform: rotateY(180deg); box-shadow: inset 12px 0 30px -10px rgba(60,30,10,.3); }
+.cover-kicker { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--muted); }
+.cover-title { font-family: var(--serif); font-weight: 600; font-size: 76px; line-height: 1; letter-spacing: .04em; margin: 6px 0 10px; }
+.cover-orn { width: 150px; margin: 0; }
+.cover-hint { position: absolute; bottom: calc(56px + var(--safe-b)); font-size: 14px; color: var(--muted); animation: hint 2.4s ease-in-out infinite; }
+@keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
 
+<!-- Главный экран: меню. Обложка открывается, под ней разворот с разделами -->
+<div class="menu" id="menu" hidden>
+  <div class="menu-inside">
+    <div class="mi-page">
+      <div class="mi-kicker">Мои рецепты</div>
+      <h2 class="mi-title">Меню</h2>
+      <div class="mi-orn">✦</div>
+      <nav class="mi-list" id="menuList" aria-label="Разделы меню"></nav>
+      <div class="mi-list mi-extra" id="menuExtra"></div>
+    </div>
+  </div>
+  <button class="menu-cover" id="menuCover" aria-label="Открыть меню">
+    <span class="cover-face"><span class="cover-kicker">Мои рецепты</span><span class="cover-title">Меню</span><span class="mi-orn cover-orn">✦</span><span class="cover-hint">Нажмите, чтобы открыть</span></span>
+    <span class="cover-back"></span>
+  </button>
+</div>
+
 <header id="hdr">
   <div class="wrap">
     <div class="top">
+      <button class="btn sq" id="menuBtn" aria-label="Меню" data-i="book"></button>
       <h1 id="title">Рецепты</h1>
       <button class="btn primary" id="installBtn" hidden></button>
       <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
@@ -300,6 +363,7 @@ const MAX_TIME = 240;
 const ICONS = {
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   sliders: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  book: '<path d="M3 5.5c2.5-1 5.5-1 9 1 3.5-2 6.5-2 9-1v13c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1z"/><path d="M12 6.5v13"/>',
   heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   flame: '<path d="M12 21c-3.9 0-7-2.8-7-6.6 0-2.9 1.8-5 3.6-6.9.4 1.6 1.3 2.7 2.4 3.1C11 7 12.5 4.6 15 3c-.3 2.6.7 4.5 2.2 6.2A7.4 7.4 0 0 1 19 14.4C19 18.2 15.9 21 12 21Z"/>',
@@ -526,7 +590,8 @@ function closeSheets(fromHistory) {
   document.body.classList.remove('lock'); releaseWake();
   if (!fromHistory && history.state && history.state.sheet) history.back();
 }
-addEventListener('popstate', () => closeSheets(true));
+// «Назад»: сначала закрываются панели, а из списка рецептов возвращаемся в меню
+addEventListener('popstate', () => { closeSheets(true); if (!history.state) showMenu(false); });
 document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
 
@@ -652,11 +717,41 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Быстрые действия с иконки приложения (долгое нажатие на Android): #fav или #<раздел>
+// ---------- Главный экран-меню ----------
+// В истории браузера меню — нижняя запись, список рецептов — запись { app: 1 } поверх него
+function renderMenu() {
+  const item = (go, name, n) => `<button class="mi-item" data-go="${go}"><span>${esc(name)}</span><span class="dots"></span><span class="n">${n}</span></button>`;
+  $('#menuList').innerHTML = SECTIONS.map(s => item(s.id, s.title, RECIPES.filter(r => r.sections.includes(s.id)).length)).join('');
+  $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size);
+}
+function showMenu(withCover) {
+  renderMenu();
+  const m = $('#menu');
+  m.classList.remove('leaving');
+  m.classList.toggle('opened', !withCover);
+  m.classList.toggle('instant', !withCover);   // при возврате разворот виден сразу, без перелистывания
+  m.hidden = false; document.body.classList.add('menu-on');
+  (withCover ? $('#menuCover') : m.querySelector('.mi-item')).focus({ preventScroll: true });
+}
+function leaveMenu(go) {
+  Object.assign(state, freshFilters(), { q: '', section: go === 'fav' ? 'all' : go, favOnly: go === 'fav' });
+  $('#q').value = ''; update(); scrollTo(0, 0); centerTab();
+  const m = $('#menu');
+  m.classList.add('leaving'); document.body.classList.remove('menu-on');
+  setTimeout(() => { m.hidden = true; }, 350);
+  history.pushState({ app: 1 }, '');
+}
+$('#menuCover').onclick = () => { const m = $('#menu'); m.classList.remove('instant'); m.classList.add('opened'); };
+$('#menu').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) leaveMenu(b.dataset.go); });
+$('#menuBtn').onclick = () => { if (history.state && history.state.app) history.back(); else showMenu(false); };
+
+// Быстрые действия с иконки приложения (долгое нажатие на Android): #fav или #<раздел> — сразу к рецептам
 const startHash = location.hash.slice(1);
 if (startHash) history.replaceState(null, '', location.pathname);
-if (startHash === 'fav') state.favOnly = true;
-else if (sectionById(startHash)) state.section = startHash;
+if (startHash === 'fav' || sectionById(startHash)) {
+  if (startHash === 'fav') state.favOnly = true; else state.section = startHash;
+  history.pushState({ app: 1 }, '');
+} else showMenu(true);
 update();
 centerTab();
 </script>
