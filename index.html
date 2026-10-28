@@ -193,6 +193,8 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .ing input:checked + span .hand { opacity: .55; }
 .ing:not(.pp) + .pp-hint { display: none; }
 .pp-hint .i { color: var(--pp); }
+.stat .swap .hand { margin: -4px 0 1px; transform-origin: center; font-size: 22px; }
+.stat .swap s { font-weight: 500; font-size: 13px; }
 @keyframes strike { from { background-size: 0 2px; } }
 @keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @media (prefers-reduced-motion: reduce) { .pp .swap .hand, .pp .swap s { animation: none; } }
@@ -543,6 +545,7 @@ function openRecipe(id) {
   const swaps = r.ingredients.map(ppSwap), ppCount = swaps.filter(s => s.pp).length;
   const ppIds = new Set(store.get('pp', []));
   let ppOn = ppIds.has(id) && ppCount > 0;
+  const ppK = ppKcal(r), kcalNow = () => ppOn ? ppK : r.kcal;
   $('#viewPanel').innerHTML = `
     <div class="hero">
       ${media(r, true)}
@@ -555,9 +558,11 @@ function openRecipe(id) {
     <div class="content">
       <h2>${esc(r.title)}</h2>
       <div class="tags">${r.sections.map(s => `<span class="tag sec">${esc(sectionById(s).title)}</span>`).join('')}${r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-      <div class="stats">
+      <div class="stats${ppOn ? ' pp' : ''}">
         <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>время</span></div>
-        <div class="stat">${icon('flame')}<b>${r.kcal} ккал</b><span>на порцию</span></div>
+        <div class="stat">${icon('flame')}<b>${ppK !== r.kcal
+          ? `<span class="swap"><span class="hand">${ppK} ккал</span><s>${r.kcal} ккал</s></span>`
+          : `${r.kcal} ккал`}</b><span>на порцию</span></div>
         <div class="stat portions">
           <div class="stepper"><button id="sMinus" aria-label="Меньше порций">${icon('minus')}</button><b id="sN">${r.servings}</b><button id="sPlus" aria-label="Больше порций">${icon('plus')}</button></div>
           <span id="sLbl">${plural(r.servings, 'порция', 'порции', 'порций')}</span>
@@ -587,6 +592,7 @@ function openRecipe(id) {
   if (ppCount) $('#vPP').onclick = () => {
     ppOn = !ppOn; ppOn ? ppIds.add(id) : ppIds.delete(id); store.set('pp', [...ppIds]);
     $('#vPP').setAttribute('aria-checked', ppOn); $('#viewPanel .ing').classList.toggle('pp', ppOn);
+    $('#viewPanel .stats').classList.toggle('pp', ppOn); setPortions(portions);
   };
   // Калькулятор порций: пересчитываем только количества, отметки и ПП-замены остаются
   let portions = r.servings;
@@ -597,14 +603,14 @@ function openRecipe(id) {
     $('#sMinus').disabled = portions <= 1; $('#sPlus').disabled = portions >= 24;
     $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k));
     $('#vScaled').hidden = k === 1;
-    $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${word} · ≈ ${r.kcal * portions} ккал всего`;
+    $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${word} · ≈ ${kcalNow() * portions} ккал всего`;
   };
   $('#sMinus').onclick = () => setPortions(portions - 1);
   $('#sPlus').onclick = () => setPortions(portions + 1);
   $('#vScaleReset').onclick = () => setPortions(r.servings);
   setPortions(portions);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
-    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${plural(portions, 'порция', 'порции', 'порций')}, ≈ ${r.kcal} ккал на порцию\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${plural(portions, 'порция', 'порции', 'порций')}, ≈ ${kcalNow()} ккал на порцию\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
