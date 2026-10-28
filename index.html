@@ -46,14 +46,23 @@ button { cursor: pointer; background: none; border: none; padding: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .i { width: 20px; height: 20px; flex: none; display: block; }
 
-/* ---------- Шапка ---------- */
-header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 92%, transparent);
-         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(10px + var(--safe-t)) 16px 0; border-bottom: 1px solid transparent; transition: border-color .2s; }
-header.scrolled { border-bottom-color: var(--line); }
+/* ---------- Шапка: в стиле ресторанного меню, как обложка ---------- */
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 93%, transparent);
+         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(8px + var(--safe-t)) 16px 0;
+         border-bottom: 1px solid var(--paper-line); transition: box-shadow .2s; }
+header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: var(--paper-line); opacity: .6; }   /* вторая тонкая линия, как рамка на обложке */
+header.scrolled { box-shadow: 0 8px 18px -12px rgba(60,30,10,.25); }
 .wrap { max-width: 1100px; margin: 0 auto; }
-.top { display: flex; align-items: center; gap: 8px; min-height: 42px; }
-@media (max-width: 360px) { h1 { font-size: 21px !important; white-space: normal !important; } }
-h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 1.05; margin: 0 0 0 4px; flex: 1; letter-spacing: .01em; color: var(--paper-ink);
+     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 480px) { h1 { font-size: 27px; white-space: normal; } }
+@media (max-width: 360px) { h1 { font-size: 24px; } }
+/* значки в шапке — без рамок, как на бумаге */
+.top .btn.sq { border-color: transparent; background: transparent; border-radius: 50%; color: var(--paper-ink); }
+.top .btn.sq.on { background: var(--accent-soft); color: var(--accent); }
+.hdr-orn { display: flex; align-items: center; gap: 12px; color: var(--paper-line); font-size: 11px; margin: 4px 0 8px; }
+.hdr-orn::before, .hdr-orn::after { content: ""; flex: 1; height: 1px; background: currentColor; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 14px; border-radius: 12px;
        background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: transform .1s; position: relative; }
 .btn:active { transform: scale(.97); }
@@ -63,24 +72,29 @@ h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02
 .btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .dot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
 
-.search-row { display: flex; gap: 8px; margin-top: 10px; }
+.search-row { display: flex; gap: 8px; }
 .search { flex: 1; position: relative; }
-.search .i { position: absolute; left: 12px; top: 12px; color: var(--muted); pointer-events: none; }
-.search input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 40px; outline: none; font-size: 16px; -webkit-appearance: none; }
+.search .i { position: absolute; left: 14px; top: 12px; color: var(--muted); pointer-events: none; }
+.search input { width: 100%; height: 44px; border-radius: 999px; border: 1px solid var(--paper-line); background: var(--paper); color: var(--paper-ink);
+                padding: 0 40px 0 44px; outline: none; font-size: 16px; -webkit-appearance: none; }
+.search input::placeholder { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--muted); }
 .search input::-webkit-search-cancel-button { display: none; }
 .search input:focus { border-color: var(--accent); }
 .search .clear { position: absolute; right: 6px; top: 6px; width: 32px; height: 32px; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--muted); }
 .search.has .clear { display: flex; }
-.search-row .btn { height: 44px; width: 44px; padding: 0; }
+.search-row .btn { height: 44px; width: 44px; padding: 0; border-radius: 50%; background: var(--paper); border-color: var(--paper-line); color: var(--paper-ink); }
+.search-row .btn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
-/* Вкладки-разделы */
-.sections { position: relative; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 12px -16px 0; padding: 0 16px 12px; }
+/* Вкладки-разделы: текстом, как строки меню, через точку; выбранная подчёркнута */
+.sections { position: relative; display: flex; overflow-x: auto; scrollbar-width: none; margin: 4px -16px 0; padding: 0 10px 2px; }
 .sections::-webkit-scrollbar { display: none; }
-.sec-tab { flex: none; display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px 0 11px; border-radius: 999px; border: 1px solid var(--line);
-           background: var(--surface); font-size: 14px; font-weight: 600; white-space: nowrap; color: var(--text); transition: background .15s, color .15s, border-color .15s; }
-.sec-tab .i { width: 18px; height: 18px; color: var(--accent); }
-.sec-tab.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.sec-tab.on .i { color: var(--accent-ink); }
+.sec-tab { flex: none; position: relative; display: flex; align-items: center; height: 42px; padding: 0 13px; white-space: nowrap;
+           font-family: var(--serif); font-size: 20px; font-weight: 500; color: var(--muted); transition: color .2s; }
+.sec-tab + .sec-tab::before { content: "·"; position: absolute; left: -3px; color: var(--paper-line); font-weight: 600; }
+.sec-tab.on { color: var(--paper-ink); font-weight: 600; }
+.sec-tab::after { content: ""; position: absolute; left: 13px; right: 13px; bottom: 6px; height: 2px; border-radius: 1px; background: var(--accent);
+                  transform: scaleX(0); transition: transform .25s ease; }
+.sec-tab.on::after { transform: scaleX(1); }
 
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
@@ -363,6 +377,7 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
       <button class="btn sq" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><span class="dot" id="cartN" hidden></span></button>
       <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
+    <div class="hdr-orn" aria-hidden="true">✦</div>
     <div class="search-row">
       <div class="search" id="searchBox">
         <span data-i="search"></span>
@@ -589,7 +604,7 @@ const ALL_TAGS = [...new Set(RECIPES.flatMap(r => r.tags))];
 
 function renderControls() {
   $('#sections').innerHTML = [{ id: 'all', title: 'Все' }, ...SECTIONS].map(s =>
-    `<button class="sec-tab ${state.section === s.id ? 'on' : ''}" data-sec="${s.id}" aria-current="${state.section === s.id}">${icon(s.id)}${s.title}</button>`).join('');
+    `<button class="sec-tab ${state.section === s.id ? 'on' : ''}" data-sec="${s.id}" aria-current="${state.section === s.id}">${s.title}</button>`).join('');
   const kc = $('#kcalChips'); kc.innerHTML = '';
   KCAL.forEach(([l]) => kc.append(chip(l, state.kcal.has(l), () => { toggle(state.kcal, l); update(); })));
   const tc = $('#tagChips'); tc.innerHTML = '';
