@@ -49,6 +49,7 @@ header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, v
 header.scrolled { border-bottom-color: var(--line); }
 .wrap { max-width: 1100px; margin: 0 auto; }
 .top { display: flex; align-items: center; gap: 8px; min-height: 42px; }
+@media (max-width: 360px) { h1 { font-size: 21px !important; white-space: normal !important; } }
 h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 14px; border-radius: 12px;
        background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: transform .1s; position: relative; }
@@ -271,6 +272,8 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .cover-kicker { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--muted); }
 .cover-title { font-family: var(--serif); font-weight: 600; font-size: 76px; line-height: 1; letter-spacing: .04em; margin: 6px 0 10px; }
 .cover-orn { width: 150px; margin: 0; }
+.menu:not(.font-ready) .cover-face > * { opacity: 0; }
+.cover-face > * { transition: opacity .4s; }
 .cover-hint { position: absolute; bottom: calc(56px + var(--safe-b)); font-size: 14px; color: var(--muted); animation: hint 2.4s ease-in-out infinite; }
 @keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
@@ -307,7 +310,7 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
     <div class="search-row">
       <div class="search" id="searchBox">
         <span data-i="search"></span>
-        <input id="q" type="search" placeholder="Блюдо или ингредиент" autocomplete="off" enterkeyhint="search" aria-label="Поиск">
+        <input id="q" type="search" placeholder="Блюдо или продукт" autocomplete="off" enterkeyhint="search" aria-label="Поиск">
         <button class="clear" id="qClear" aria-label="Очистить поиск" data-i="x"></button>
       </div>
       <button class="btn" id="filterBtn" aria-label="Фильтры"><span data-i="sliders"></span><span class="dot" id="filterDot" hidden></span></button>
@@ -412,6 +415,16 @@ const fmtTime = m => m >= 60 ? `${Math.floor(m / 60)} ч${m % 60 ? ' ' + (m % 60
 // Полное время с ожиданием (холодильник, маринование) — по нему фильтруем и сортируем
 const totalTime = r => r.time + (r.wait || 0);
 const fmtWait = r => r.wait ? `+ ${fmtTime(r.wait)} ${r.waitFor}` : '';
+// Единицы порций: [1, 2–4, 5+, «на 1 …» (винительный), подпись к калориям]. У напитков — чашки
+const UNITS = {
+  portion: ['порция', 'порции', 'порций', 'порцию', 'на порцию'],
+  cup: ['чашка', 'чашки', 'чашек', 'чашку', 'на чашку'],
+  piece: ['штука', 'штуки', 'штук', 'штуку', 'на штуку'],
+  ball: ['шарик', 'шарика', 'шариков', 'шарик', 'на шарик']
+};
+const unitOf = r => UNITS[r.unit || (r.sections.includes('drinks') ? 'cup' : 'portion')];
+// acc — форма после «на»: «на 1 порцию», «на 2 порции»
+const unitWord = (r, n, acc) => { const u = unitOf(r), w = plural(n, u[0], u[1], u[2]); return acc && w === u[0] ? u[3] : w; };
 const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
 const recipesWord = n => `${n} ${plural(n, 'рецепт', 'рецепта', 'рецептов')}`;
 
@@ -470,11 +483,22 @@ function sorted(list) {
   if (state.sort === 'kcal') return list.slice().sort((a, b) => a.kcal - b.kcal);
   return list;
 }
+// Насколько рецепт подходит под поиск: 0 — слово в названии, 1 — в ключевых словах, разделе или теге, 2 — только в ингредиентах
+const titleText = new Map(RECIPES.map(r => [r.id, norm(r.title)]));
+const aboutText = new Map(RECIPES.map(r => [r.id, norm([r.title, r.keywords || '', ...r.tags, ...r.sections.map(s => sectionById(s).title)].join(' '))]));
+function searchRank(r, words) {
+  if (words.every(w => titleText.get(r.id).includes(w))) return 0;
+  return words.every(w => aboutText.get(r.id).includes(w)) ? 1 : 2;
+}
 function filtered() {
-  return sorted(RECIPES.filter(r =>
+  const list = sorted(RECIPES.filter(r =>
     (!state.favOnly || favorites.has(r.id)) &&
     (state.section === 'all' || r.sections.includes(state.section)) &&
     matches(r)));
+  const words = norm(state.q).split(/[\s,]+/).filter(Boolean).map(stem);
+  if (!words.length || state.sort !== 'default') return list;
+  const rank = new Map(list.map(r => [r.id, searchRank(r, words)]));
+  return list.sort((a, b) => rank.get(a.id) - rank.get(b.id));   // сортировка устойчивая: внутри группы порядок прежний
 }
 
 function chip(label, on, onClick) {
@@ -633,10 +657,10 @@ function openRecipe(id) {
         <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>${r.wait ? esc(fmtWait(r)) : 'время'}</span></div>
         <div class="stat">${icon('flame')}<b>${ppK !== r.kcal
           ? `<span class="swap"><span class="hand">${ppK} ккал</span><s>${r.kcal} ккал</s></span>`
-          : `${r.kcal} ккал`}</b><span>на порцию</span></div>
+          : `${r.kcal} ккал`}</b><span>${unitOf(r)[4]}</span></div>
         <div class="stat portions">
           <div class="stepper"><button id="sMinus" aria-label="Меньше порций">${icon('minus')}</button><b id="sN">${r.servings}</b><button id="sPlus" aria-label="Больше порций">${icon('plus')}</button></div>
-          <span id="sLbl">${plural(r.servings, 'порция', 'порции', 'порций')}</span>
+          <span id="sLbl">${unitWord(r, r.servings)}</span>
         </div>
       </div>
       ${swaps.some(s => s.pp)
@@ -669,19 +693,19 @@ function openRecipe(id) {
   let portions = r.servings;
   const setPortions = n => {
     portions = Math.min(24, Math.max(1, n));
-    const k = portions / r.servings, word = plural(portions, 'порция', 'порции', 'порций');
+    const k = portions / r.servings, word = unitWord(r, portions);
     $('#sN').textContent = portions; $('#sLbl').textContent = word;
     $('#sMinus').disabled = portions <= 1; $('#sPlus').disabled = portions >= 24;
     $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k));
     $('#vScaled').hidden = k === 1;
-    $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${word} · ≈ ${kcalNow() * portions} ккал всего`;
+    $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${unitWord(r, portions, true)} · ≈ ${kcalNow() * portions} ккал всего`;
   };
   $('#sMinus').onclick = () => setPortions(portions - 1);
   $('#sPlus').onclick = () => setPortions(portions + 1);
   $('#vScaleReset').onclick = () => setPortions(r.servings);
   setPortions(portions);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
-    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${plural(portions, 'порция', 'порции', 'порций')}, ≈ ${kcalNow()} ккал на порцию\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${unitWord(r, portions)}, ≈ ${kcalNow()} ккал ${unitOf(r)[4]}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
@@ -731,6 +755,7 @@ function showMenu(withCover) {
   m.classList.toggle('opened', !withCover);
   m.classList.toggle('instant', !withCover);   // при возврате разворот виден сразу, без перелистывания
   m.hidden = false; document.body.classList.add('menu-on');
+  $('#hdr').inert = $('#main').inert = true;
   (withCover ? $('#menuCover') : m.querySelector('.mi-item')).focus({ preventScroll: true });
 }
 function leaveMenu(go) {
@@ -738,9 +763,12 @@ function leaveMenu(go) {
   $('#q').value = ''; update(); scrollTo(0, 0); centerTab();
   const m = $('#menu');
   m.classList.add('leaving'); document.body.classList.remove('menu-on');
+  $('#hdr').inert = $('#main').inert = false;
   setTimeout(() => { m.hidden = true; }, 350);
   history.pushState({ app: 1 }, '');
 }
+Promise.race([document.fonts.load('600 76px "Cormorant Garamond"', 'Меню'), new Promise(r => setTimeout(r, 1500))])
+  .finally(() => $('#menu').classList.add('font-ready'));
 $('#menuCover').onclick = () => { const m = $('#menu'); m.classList.remove('instant'); m.classList.add('opened'); };
 $('#menu').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) leaveMenu(b.dataset.go); });
 $('#menuBtn').onclick = () => { if (history.state && history.state.app) history.back(); else showMenu(false); };

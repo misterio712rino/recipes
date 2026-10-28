@@ -20,6 +20,7 @@
   "shortcuts": [
     { "name": "Избранное", "url": "./#fav", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Завтраки", "url": "./#breakfast", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Праздничное меню", "url": "./#festive", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Праздничное меню", "url": "./#festive", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Напитки", "url": "./#drinks", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
