@@ -1,6 +1,6 @@
 ﻿// Кэш для работы без интернета. При каждом выпуске новой версии увеличивайте VERSION —
 // тогда у пользователей появится предложение «Доступна новая версия — Обновить».
-const VERSION = 'recipes-v7';
+const VERSION = 'recipes-v8';
 const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
@@ -14,6 +14,10 @@ self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipW
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
     .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== 'images').map(k => caches.delete(k))))
+    // Старые фото с Unsplash больше не нужны — освобождаем место на телефоне
+    .then(() => caches.open('images')).then(async c => {
+      for (const req of await c.keys()) if (new URL(req.url).hostname === 'images.unsplash.com') await c.delete(req);
+    })
     .then(() => self.clients.claim()));
 });
 
@@ -22,8 +26,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Фото и рукописный шрифт: сначала из кэша, иначе из сети с сохранением
-  if (url.hostname === 'images.unsplash.com' || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+  // Фото блюд и рукописный шрифт: сначала из кэша, иначе из сети с сохранением.
+  // Кэш 'images' переживает обновления приложения; новое фото приходит со сменой ?v= в адресе.
+  const isPhoto = url.origin === location.origin && url.pathname.includes('/photos/');
+  if (isPhoto || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     e.respondWith(caches.open('images').then(async c => {
       const hit = await c.match(req);
       if (hit) return hit;
