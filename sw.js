@@ -1,12 +1,16 @@
 ﻿// Кэш для работы без интернета. При каждом выпуске новой версии увеличивайте VERSION —
 // тогда у пользователей появится предложение «Доступна новая версия — Обновить».
-const VERSION = 'recipes-v13';
+const VERSION = 'recipes-v14';
 const SHELL = ['./', 'index.html', 'recipes.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', e => {
-  // Первая установка активируется сразу, обновления ждут нажатия «Обновить»
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => { if (!self.registration.active) return self.skipWaiting(); }));
+  // Первая установка активируется сразу, обновления ждут нажатия «Обновить».
+  // cache: 'reload' — берём файлы прямо с сервера: GitHub Pages разрешает браузеру держать их 10 минут,
+  // и без этого новая версия могла сохранить у себя старые файлы.
+  e.waitUntil(caches.open(VERSION)
+    .then(c => c.addAll(SHELL.map(url => new Request(url, { cache: 'reload' }))))
+    .then(() => { if (!self.registration.active) return self.skipWaiting(); }));
 });
 
 self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });
