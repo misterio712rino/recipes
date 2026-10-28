@@ -23,6 +23,8 @@
   --accent: #e4572e; --accent-ink: #ffffff; --accent-soft: #fde8e0;
   --pen: #2453b8; --pp: #3f8f4e; --pp-soft: #e5f3e3;
   --shadow: 0 1px 2px rgba(60,30,10,.06), 0 6px 20px rgba(60,30,10,.07);
+  /* многослойная тень: карточка «приподнята» над фоном */
+  --shadow-card: 0 1px 2px rgba(60,30,10,.06), 0 8px 18px -6px rgba(60,30,10,.16), 0 26px 44px -20px rgba(60,30,10,.24);
   --radius: 18px;
   --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
 }
@@ -30,7 +32,8 @@
   :root { --bg: #181311; --surface: #231c19; --surface-2: #2d2421; --text: #f4ece7; --muted: #a8978d; --line: #362c28;
           --accent: #ff7149; --accent-ink: #1b0f0b; --accent-soft: #3d2620;
           --pen: #8fb4ff; --pp: #7cc98a; --pp-soft: #1f3322;
-          --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
+          --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+          --shadow-card: 0 1px 2px rgba(0,0,0,.35), 0 10px 22px -6px rgba(0,0,0,.5), 0 28px 48px -20px rgba(0,0,0,.6); }
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -84,16 +87,30 @@ h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02
 .chip.on { background: var(--text); border-color: var(--text); color: var(--bg); }
 
 /* ---------- Главная: ленты по разделам ---------- */
-main { padding: 4px 16px calc(40px + var(--safe-b)); }
+main { padding: 4px 20px calc(40px + var(--safe-b)); }
 
 /* ---------- Список ---------- */
 .count { color: var(--muted); font-size: 14px; margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .count button { color: var(--accent); font-size: 14px; font-weight: 500; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-.card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; position: relative;
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 26px 20px; }
+.card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); cursor: pointer; position: relative;
         transition: transform .15s; animation: rise .3s ease both; }
 .card:active { transform: scale(.98); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+/* Карточки ниже экрана «выплывают» с лёгким наклоном, когда до них докручивают */
+.card.pre { animation: none; opacity: 0; transform: perspective(900px) translateY(46px) rotateX(14deg) scale(.95); }
+.card.reveal { transition: transform .75s cubic-bezier(.2,.75,.25,1), opacity .6s ease; }
+/* На компьютере карточка слегка наклоняется за курсором */
+@media (hover: hover) and (pointer: fine) { .card.tilt { transition: transform .12s; } }
+
+/* ---------- Фон: полупрозрачный орнамент в два слоя, движется медленнее карточек ---------- */
+.decor { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.decor i { position: absolute; left: 0; right: 0; top: 0; will-change: transform;
+  -webkit-mask-repeat: repeat; mask-repeat: repeat; }
+.decor .d-far { height: calc(100% + 320px); background: var(--muted); opacity: .13; }
+.decor .d-near { height: calc(100% + 560px); background: var(--accent); opacity: .14; }
+@media (prefers-color-scheme: dark) { .decor .d-far { opacity: .14; } .decor .d-near { opacity: .1; } }
+main { position: relative; z-index: 1; }   /* шапка уже над фоном: она sticky с z-index 10 */
 .media { position: relative; aspect-ratio: 4/3; background: var(--surface-2); overflow: hidden; }
 .media::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.25) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 1.3s infinite linear; }
 .media.ok::before, .media.fail::before { display: none; }
@@ -334,6 +351,8 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
     <span class="cover-back"></span>
   </button>
 </div>
+
+<div class="decor" aria-hidden="true"><i class="d-far"></i><i class="d-near"></i></div>
 
 <header id="hdr">
   <div class="wrap">
@@ -601,6 +620,7 @@ function render() {
   main.innerHTML = `
     <div class="count"><span>${list.length ? recipesWord(list.length) : ''}</span>${narrowed() && list.length ? '<button data-reset-filters>Сбросить фильтры</button>' : ''}</div>
     <div class="grid">${list.length ? list.map((r, i) => card(r, i, i < 4)).join('') : emptyState()}</div>`;
+  if (typeof revealCards === 'function') revealCards();
 }
 
 function update() { renderControls(); render(); }
@@ -948,6 +968,79 @@ if ('serviceWorker' in navigator) {
     } catch {}
   });
 }
+
+// ---------- Объём: орнамент на фоне, параллакс и «выплывающие» карточки ----------
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Контурные мотивы кухни в рамке 24×24
+const MOTIFS = {
+  leaf: '<path d="M3 21C3 11 10 4 21 3c-1 11-8 18-18 18Z"/><path d="M3 21 14 10M9 15h4M11 12v-3"/>',
+  wheat: '<path d="M12 22V5"/><path d="M12 8c-3-.6-4.5-2.6-4.5-5 2.6 0 4.2 2 4.5 5Zm0 0c3-.6 4.5-2.6 4.5-5-2.6 0-4.2 2-4.5 5Zm0 5c-3-.6-4.5-2.6-4.5-5 2.6 0 4.2 2 4.5 5Zm0 0c3-.6 4.5-2.6 4.5-5-2.6 0-4.2 2-4.5 5Zm0 5c-3-.6-4.5-2.6-4.5-5 2.6 0 4.2 2 4.5 5Zm0 0c3-.6 4.5-2.6 4.5-5-2.6 0-4.2 2-4.5 5Z"/>',
+  whisk: '<path d="M12 23v-7"/><path d="M12 16C8 13 7 6 9.5 3c2-1.5 3.5 2 2.5 13Zm0 0c4-3 5-10 2.5-13-2-1.5-3.5 2-2.5 13Zm0 0c-1.6-5-1.6-10 0-14 1.6 4 1.6 9 0 14Z"/>',
+  spoon: '<path d="M12 23V12"/><path d="M12 12c-2.6 0-4.2-2.2-4.2-5.2S9.4 2 12 2s4.2 1.8 4.2 4.8S14.6 12 12 12Z"/>',
+  fork: '<path d="M12 23V11M8 2v5a4 4 0 0 0 8 0V2M12 2v6"/>',
+  chili: '<path d="M5 20c8.5 0 14-6.5 14-13.5 0-1.6-1-2.6-2.1-2.6-1 6.2-5.4 11.3-11.6 12.4-1.6.3-1.6 3.7-.3 3.7Z"/><path d="M16.9 3.9c0-1.6.6-2.6 2.1-3"/>',
+  anise: '<g>' + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<ellipse cx="12" cy="6.6" rx="1.7" ry="4" transform="rotate(${a} 12 12)"/>`).join('') + '<circle cx="12" cy="12" r="1.3"/></g>',
+  curl: '<path d="M2 14c2.5-6 8-7 10-2s7.5 4 10-2"/><path d="M6 12.5c-1.5 1.8-.5 4 1.4 3.6M18 11.5c1.5-1.8.5-4-1.4-3.6"/>',
+  dots: '<circle cx="5" cy="6" r="1"/><circle cx="12" cy="4" r="1"/><circle cx="19" cy="7" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="13" r="1"/>'
+};
+// Плитка орнамента: [мотив, x, y, поворот, размер]; повторяется по всему фону.
+// stroke — толщина линии в единицах мотива (24×24), поэтому у крупных мотивов число меньше
+function decorTile(w, h, items, stroke) {
+  const body = items.map(([m, x, y, rot, size]) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${size / 24}) translate(-12 -12)">${MOTIFS[m]}</g>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" stroke="#000" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0 / ${w}px ${h}px`;
+}
+const DECOR = {
+  far: { el: $('.d-far'), h: 320, speed: .18, tile: decorTile(320, 320, [
+    ['dots', 40, 40, 0, 36], ['leaf', 150, 70, 20, 30], ['anise', 265, 45, 10, 28], ['curl', 90, 170, -10, 44],
+    ['wheat', 230, 175, 25, 34], ['dots', 280, 270, 40, 30], ['chili', 50, 270, -30, 28], ['leaf', 165, 260, 200, 24]], 1.3) },
+  near: { el: $('.d-near'), h: 560, speed: .42, tile: decorTile(480, 560, [
+    ['whisk', 70, 90, -25, 76], ['leaf', 260, 60, 35, 60], ['anise', 410, 140, 15, 58], ['wheat', 170, 250, 18, 80],
+    ['spoon', 360, 320, 30, 70], ['curl', 60, 380, -8, 90], ['chili', 250, 460, -20, 60], ['fork', 430, 500, -30, 64]], .85) }
+};
+for (const d of Object.values(DECOR)) { d.el.style.webkitMask = d.tile; d.el.style.mask = d.tile; d.el.style.webkitMaskRepeat = d.el.style.maskRepeat = 'repeat'; }
+// Фон отстаёт от прокрутки: дальний слой — сильнее, ближний — меньше, карточки идут с пальцем
+let parallaxFrame = 0;
+function parallax() {
+  parallaxFrame = 0;
+  for (const d of Object.values(DECOR)) d.el.style.transform = `translate3d(0, ${-((scrollY * d.speed) % d.h)}px, 0)`;
+}
+if (!calm) addEventListener('scroll', () => { if (!parallaxFrame) parallaxFrame = requestAnimationFrame(parallax); }, { passive: true });
+
+// Карточки ниже экрана ждут, пока до них докрутят, и «выплывают».
+// Проверка по таймеру при прокрутке, а не IntersectionObserver: так карточка гарантированно появится на любом телефоне
+function revealVisible() {
+  for (const c of document.querySelectorAll('#main .card.pre')) {
+    if (c.getBoundingClientRect().top > innerHeight * .94) continue;
+    c.classList.add('reveal'); c.classList.remove('pre');
+    setTimeout(() => c.classList.remove('reveal'), 800);
+  }
+}
+function revealCards() {
+  if (calm) return;
+  for (const c of document.querySelectorAll('#main .card')) if (c.getBoundingClientRect().top > innerHeight) {
+    c.style.animation = 'none';   // обычное появление не нужно — его заменяет «выплывание»
+    c.classList.add('pre');
+  }
+}
+let revealTimer = 0;
+if (!calm) addEventListener('scroll', () => { if (!revealTimer) revealTimer = setTimeout(() => { revealTimer = 0; revealVisible(); }, 60); }, { passive: true });
+addEventListener('resize', revealVisible);
+// На компьютере карточка наклоняется за курсором (на телефоне курсора нет)
+if (!calm && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  $('#main').addEventListener('pointermove', e => {
+    const c = e.target.closest('.card'); if (!c || c.classList.contains('pre')) return;
+    const b = c.getBoundingClientRect(), x = (e.clientX - b.left) / b.width - .5, y = (e.clientY - b.top) / b.height - .5;
+    c.classList.add('tilt'); c.style.transform = `perspective(900px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateY(-3px)`;
+  });
+  $('#main').addEventListener('pointerout', e => { const c = e.target.closest('.card'); if (c && !c.contains(e.relatedTarget)) { c.style.transform = ''; c.classList.remove('tilt'); } });
+}
+// В открытом рецепте фото уезжает медленнее текста
+if (!calm) $('#viewPanel').addEventListener('scroll', e => {
+  const img = e.target.querySelector('.hero img'); if (!img) return;
+  const st = e.target.scrollTop; if (st > innerHeight) return;
+  img.style.transform = `translate3d(0, ${st * .45}px, 0) scale(${1 + st / 3000})`;
+}, { passive: true });
 
 // ---------- Главный экран-меню ----------
 // В истории браузера меню — нижняя запись, список рецептов — запись { app: 1 } поверх него
