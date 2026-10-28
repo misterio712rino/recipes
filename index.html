@@ -329,6 +329,35 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .dice-card.landed { animation: land .45s cubic-bezier(.2,1.4,.4,1); }
 @keyframes land { from { transform: scale(.94); } }
 .dice-hint { color: var(--muted); font-size: 13px; text-align: center; margin: 8px 0 0; }
+.mode-tabs { display: flex; gap: 6px; margin: 0 0 12px; }
+.mode-tabs button { flex: 1; height: 40px; border-radius: 999px; border: 1px solid var(--paper-line); font-size: 14px; font-weight: 600; color: var(--muted); }
+.mode-tabs button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* Подбор блюд по продуктам */
+.fr-lead { margin: 0 0 10px; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.fr-field { position: relative; }
+.fr-field input { width: 100%; height: 44px; border-radius: 999px; border: 1px solid var(--paper-line); background: var(--paper); padding: 0 16px; font-size: 16px; outline: none; -webkit-appearance: none; }
+.fr-field input:focus { border-color: var(--accent); }
+.fr-sugg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.fr-sugg:empty { display: none; }
+.fr-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.fr-chips:empty { display: none; }
+.fr-chip { display: inline-flex; align-items: center; gap: 4px; height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 14px; }
+.fr-chip.mine { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; padding-right: 6px; }
+.fr-chip.mine .i { width: 14px; height: 14px; }
+.fr-chip.add::before { content: "+"; color: var(--muted); font-weight: 600; }
+.fr-basic { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; margin: 0 0 12px; line-height: 1.35; }
+.fr-basic input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.fr-label { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+.fr-res-head { font-family: var(--serif); font-size: 22px; font-weight: 600; margin: 18px 0 8px; }
+.fr-row { display: flex; gap: 12px; align-items: center; width: 100%; padding: 10px 0; border-bottom: 1px solid var(--line); text-align: left; }
+.fr-row .media { width: 64px; height: 64px; aspect-ratio: 1; border-radius: 12px; flex: none; }
+.fr-row .media.fail::after { font-size: 30px; }
+.fr-row b { display: block; font-size: 16px; line-height: 1.25; }
+.fr-row small { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+.fr-row .ok-all { color: var(--pp); font-weight: 600; }
+.fr-row .miss { color: var(--accent); }
+.fr-empty { color: var(--muted); text-align: center; padding: 22px 6px; font-size: 14px; }
 
 /* Список покупок */
 .cart-body { padding: 0 18px calc(18px + var(--safe-b)); }
@@ -418,9 +447,26 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
     <div class="grab"></div>
     <div class="ph-head"><h2 id="dTitle">Что приготовить?</h2><button class="btn sq ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
     <div class="dice-body">
-      <div class="seg" id="diceSeg"><button data-meal="breakfast">Завтрак</button><button data-meal="lunch">Обед</button><button data-meal="dinner">Ужин</button></div>
-      <div class="dice-card" id="diceCard" aria-live="polite"></div>
-      <div class="act-row"><button class="btn" id="diceAgain" data-i="dice">Ещё вариант</button><button class="btn primary" id="diceOpen">Открыть рецепт</button></div>
+      <div class="mode-tabs" id="diceMode" role="tablist">
+        <button data-mode="random" role="tab">🎲 Случайно</button><button data-mode="fridge" role="tab">🧺 Из продуктов</button>
+      </div>
+      <div id="paneRandom">
+        <div class="seg" id="diceSeg"><button data-meal="breakfast">Завтрак</button><button data-meal="lunch">Обед</button><button data-meal="dinner">Ужин</button></div>
+        <div class="dice-card" id="diceCard" aria-live="polite"></div>
+        <div class="act-row"><button class="btn" id="diceAgain" data-i="dice">Ещё вариант</button><button class="btn primary" id="diceOpen">Открыть рецепт</button></div>
+      </div>
+      <div id="paneFridge" hidden>
+        <p class="fr-lead">Отметьте, что есть дома, — подберём блюда. Соль, растительное масло, сахар и специи считаем, что есть всегда.</p>
+        <label class="fr-basic"><input type="checkbox" id="frBasics"> Ещё дома есть яйца, молоко, мука, сливочное масло и чеснок</label>
+        <div class="fr-field">
+          <input id="frInput" type="search" placeholder="Добавить продукт: картошка, фарш…" autocomplete="off" enterkeyhint="done" aria-label="Добавить продукт">
+          <div class="fr-sugg" id="frSugg"></div>
+        </div>
+        <div class="fr-chips" id="frMine"></div>
+        <div class="fr-label" id="frPopLabel">Часто бывает дома</div>
+        <div class="fr-chips" id="frPop"></div>
+        <div id="frResults" aria-live="polite"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -980,11 +1026,12 @@ $('#cook').addEventListener('touchend', e => {
 
 // ---------- Что приготовить? Случайное блюдо на завтрак, обед или ужин ----------
 const inSec = (r, s) => r.sections.includes(s);
-const savory = r => !inSec(r, 'cozy') && !r.tags.includes('Сладкое') && !inSec(r, 'morning') && r.id !== 'hummus';
+// В обед и ужин: несладкое, без завтраков, салатов, пирогов и перекусов; супы — да
+const savory = r => !inSec(r, 'cozy') && !r.tags.includes('Сладкое') && !inSec(r, 'morning') && !inSec(r, 'salads') && !inSec(r, 'pies') && r.id !== 'hummus';
 const MEALS = {
   breakfast: r => inSec(r, 'morning'),
-  lunch: r => savory(r) && (inSec(r, 'family') || inSec(r, 'lunchbox')),
-  dinner: r => savory(r) && (inSec(r, 'quick') || inSec(r, 'family') || inSec(r, 'light'))
+  lunch: r => savory(r) && (inSec(r, 'soups') || inSec(r, 'family') || inSec(r, 'lunchbox')),
+  dinner: r => savory(r) && (inSec(r, 'soups') || inSec(r, 'quick') || inSec(r, 'family') || inSec(r, 'light'))
 };
 const nowHour = new Date().getHours();
 let diceMeal = nowHour < 11 ? 'breakfast' : nowHour < 16 ? 'lunch' : 'dinner', dicePick = null, diceSpin = 0;
@@ -1017,8 +1064,96 @@ function roll() {
   };
   step();
 }
-function openDice() { openSheet('#diceSheet'); roll(); }
-$('#diceBtn').onclick = openDice;
+// ---------- Из моих продуктов: подбор блюд по тому, что есть дома ----------
+// Продукты и как их узнать в названии ингредиента. Чего нет в списке (соль, масло, сахар, специи) — считаем, что есть всегда
+const PRODUCTS = [
+  ['Картофель', /картоф|картош/], ['Лук', /(^|[^а-я])лук/], ['Морковь', /морков/], ['Капуста', /капуст/], ['Свёкла', /свекл/],
+  ['Помидоры', /помидор|томаты в|черри/], ['Огурцы', /огур/], ['Болгарский перец', /болгарск/], ['Чеснок', /чеснок/], ['Кабачок', /кабач/],
+  ['Баклажан', /баклажан/], ['Тыква', /тыкв/], ['Грибы', /гриб|шампиньон/], ['Авокадо', /авокадо/], ['Зелень', /шпинат|листья салата|романо|зелень|укроп|петрушк|кинз|базилик/],
+  ['Редис', /редис/], ['Зелёный горошек', /горошек/], ['Кукуруза', /кукуруз/], ['Оливки', /оливки|маслин/],
+  ['Яйца', /яйц|желт/], ['Молоко', /(?<!кокосовое )молоко/], ['Кефир', /кефир/], ['Сливки', /сливки/], ['Сметана', /сметан/], ['Творог', /творог/],
+  ['Сыр', /сыр(?!ник)|пармезан|моцарелл|чеддер|фета|маскарпоне|сулугуни/], ['Йогурт', /йогурт/], ['Сливочное масло', /сливочн/],
+  ['Мука', /мука|манн/], ['Рис', /(^|[^а-я])рис([^а-я]|$)/], ['Овсяные хлопья', /овсян/], ['Макароны', /макарон|спагетти|пенне|лингвини|лазань|лапша|вермишел/],
+  ['Хлеб', /хлеб|батон|багет|булочк|тортиль|лаваш|маффин|чиабатт|гренк/], ['Готовое тесто', /слоеное тесто/],
+  ['Говядина', /говядин|рибай|баранин/], ['Свинина', /свин/], ['Фарш', /фарш/], ['Курица', /кури|курица/],
+  ['Колбаса и сосиски', /колбас|сосиск|ветчин|бекон|гуанчиале/], ['Рыба', /лосос|сельд|судак|форел|семг|рыба /], ['Креветки', /кревет/],
+  ['Бобовые (нут, фасоль, чечевица)', /(^|[^а-я])нут|фасол|чечевиц/], ['Яблоки', /яблок/], ['Бананы', /банан/],
+  ['Ягоды', /ягод|клубник|малин|голубик|клюкв|смородин|облепих/], ['Лимон или лайм', /лимон|лайм/], ['Апельсин', /апельсин/],
+  ['Мёд', /(^|[^а-я])мед([^а-я]|$)/], ['Шоколад и какао', /шоколад|какао/], ['Орехи', /(?<!мускатный )орех|миндал|кешью/], ['Сухофрукты', /изюм|финик/],
+  ['Чай', /(^|[^а-я])чай|иван-чай|каркаде|матча/]
+];
+// Что нужно рецепту: группы продуктов. «Горошек или фасоль» — одна группа, хватит любого. «…для подачи» — необязательно
+const needs = new Map(RECIPES.map(r => {
+  const groups = [];
+  for (const ing of r.ingredients) {
+    const name = norm(ing.split(' — ')[0]);
+    if (/для подачи/.test(name)) continue;
+    const g = PRODUCTS.filter(([, re]) => re.test(name)).map(([p]) => p);
+    if (g.length && !groups.some(x => x.join() === g.join())) groups.push(g);
+  }
+  return [r.id, groups];
+}));
+const fridge = new Set(store.get('fridge', []).filter(p => PRODUCTS.some(([n]) => n === p)));
+const saveFridge = () => store.set('fridge', [...fridge]);
+// Популярные продукты — те, что чаще всего встречаются в рецептах
+const popular = PRODUCTS.map(([p]) => [p, [...needs.values()].filter(gs => gs.some(g => g.includes(p))).length]).sort((a, b) => b[1] - a[1]).map(([p]) => p);
+// То, что почти всегда есть дома; можно выключить галочкой
+const BASICS = ['Яйца', 'Молоко', 'Мука', 'Сливочное масло', 'Чеснок'];
+let useBasics = store.get('fridgeBasics', true);
+const hasProduct = p => fridge.has(p) || (useBasics && BASICS.includes(p));
+// Сверху — блюда, где пригодится больше ваших продуктов, затем — где меньше докупать
+function fridgeMatches() {
+  const res = [];
+  for (const r of RECIPES) {
+    const groups = needs.get(r.id); if (!groups.length) continue;
+    const used = groups.filter(g => g.some(p => fridge.has(p))), miss = groups.filter(g => !g.some(hasProduct));
+    if (used.length && miss.length <= 3) res.push({ r, have: used, miss });
+  }
+  return res.sort((a, b) => b.have.length - a.have.length || a.miss.length - b.miss.length || a.r.title.localeCompare(b.r.title, 'ru'));
+}
+function renderFridge() {
+  const chip = (p, cls) => `<button class="fr-chip ${cls}" data-p="${esc(p)}">${esc(p)}${cls === 'mine' ? icon('x') : ''}</button>`;
+  $('#frMine').innerHTML = [...fridge].map(p => chip(p, 'mine')).join('');
+  const pop = popular.filter(p => !fridge.has(p) && !(useBasics && BASICS.includes(p))).slice(0, 16);
+  $('#frPop').innerHTML = pop.map(p => chip(p, 'add')).join('');
+  $('#frPopLabel').hidden = !pop.length;
+  if (!fridge.size) { $('#frResults').innerHTML = `<div class="fr-empty">Добавьте хотя бы один продукт — например, картошку или фарш.</div>`; return; }
+  const list = fridgeMatches(), all = list.filter(x => !x.miss.length).length;
+  $('#frResults').innerHTML = list.length ? `<div class="fr-res-head">${all ? `Можно приготовить сразу: ${all}` : 'Почти всё есть'}</div>` + list.slice(0, 20).map(({ r, have, miss }) => `
+    <button class="fr-row" data-open-r="${esc(r.id)}">${media(r)}<span>
+      <b>${esc(r.title)}</b>
+      <small>${miss.length ? `<span class="miss">Не хватает: ${esc(miss.map(g => g[0].toLowerCase()).join(', '))}</span>` : `<span class="ok-all">✓ Есть всё нужное</span>`}</small>
+      <small>Есть: ${esc(have.map(g => g.find(p => fridge.has(p)).toLowerCase()).join(', '))}</small>
+    </span></button>`).join('')
+    : `<div class="fr-empty">Пока ничего не подходит — добавьте ещё пару продуктов.</div>`;
+}
+function suggest() {
+  const q = norm($('#frInput').value.trim());
+  if (!q) { $('#frSugg').innerHTML = ''; return; }
+  const found = PRODUCTS.filter(([p, re]) => !fridge.has(p) && (norm(p).includes(q) || re.test(q))).slice(0, 8);
+  $('#frSugg').innerHTML = found.length ? found.map(([p]) => `<button class="fr-chip add" data-p="${esc(p)}">${esc(p)}</button>`).join('')
+    : `<span class="fr-lead">Такого продукта нет в рецептах</span>`;
+}
+const addProduct = p => { fridge.add(p); saveFridge(); $('#frInput').value = ''; suggest(); renderFridge(); };
+$('#frInput').addEventListener('input', suggest);
+$('#frBasics').checked = useBasics;
+$('#frBasics').onchange = e => { useBasics = e.target.checked; store.set('fridgeBasics', useBasics); renderFridge(); };
+$('#frInput').addEventListener('keydown', e => { if (e.key === 'Enter') { const b = $('#frSugg [data-p]'); if (b) addProduct(b.dataset.p); } });
+$('#paneFridge').addEventListener('click', e => {
+  const open = e.target.closest('[data-open-r]'); if (open) { openRecipe(open.dataset.openR); return; }
+  const c = e.target.closest('[data-p]'); if (!c) return;
+  if (c.classList.contains('mine')) { fridge.delete(c.dataset.p); saveFridge(); renderFridge(); } else addProduct(c.dataset.p);
+});
+
+// Два режима окна: «Случайно» и «Из моих продуктов»
+function setDiceMode(mode) {
+  document.querySelectorAll('#diceMode [data-mode]').forEach(b => { b.classList.toggle('on', b.dataset.mode === mode); b.setAttribute('aria-selected', b.dataset.mode === mode); });
+  $('#paneRandom').hidden = mode !== 'random'; $('#paneFridge').hidden = mode !== 'fridge';
+  if (mode === 'random') roll(); else renderFridge();
+}
+$('#diceMode').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) setDiceMode(b.dataset.mode); };
+function openDice(mode = 'random') { openSheet('#diceSheet'); setDiceMode(mode); }
+$('#diceBtn').onclick = () => openDice();
 $('#diceAgain').onclick = roll;
 $('#diceSeg').onclick = e => { const b = e.target.closest('[data-meal]'); if (b) { diceMeal = b.dataset.meal; roll(); } };
 $('#diceOpen').onclick = () => { if (dicePick) openRecipe(dicePick.id); };
@@ -1141,7 +1276,8 @@ function renderMenu() {
   const last = byId(store.get('lastRecipe', ''));
   $('#menuSpecial').innerHTML = `<button data-open="${today.id}"><i>Рецепт дня —</i> ${esc(today.title)}</button>` +
     (last && last !== today ? `<button data-open="${last.id}"><i>Продолжить —</i> ${esc(last.title)}</button>` : '') +
-    `<button data-dice><i>Не знаете, что готовить? —</i> Подобрать 🎲</button>`;
+    `<button data-dice="random"><i>Не знаете, что готовить? —</i> Подобрать 🎲</button>` +
+    `<button data-dice="fridge"><i>Есть продукты дома? —</i> Что из них приготовить 🧺</button>`;
 }
 function showMenu(withCover) {
   renderMenu();
@@ -1167,7 +1303,7 @@ Promise.race([document.fonts.load('600 76px "Cormorant Garamond"', 'Меню'), 
 $('#menuCover').onclick = () => { const m = $('#menu'); m.classList.remove('instant'); m.classList.add('opened'); };
 $('#menu').addEventListener('click', e => {
   const open = e.target.closest('[data-open]'); if (open) { leaveMenu('all'); openRecipe(open.dataset.open); return; }
-  if (e.target.closest('[data-dice]')) { leaveMenu('all'); openDice(); return; }
+  const dice = e.target.closest('[data-dice]'); if (dice) { leaveMenu('all'); openDice(dice.dataset.dice); return; }
   const b = e.target.closest('[data-go]'); if (!b) return;
   if (b.dataset.go === 'install') { $('#installBtn').onclick(); return; }   // окно установки поверх меню
   if (b.dataset.go === 'cart') { leaveMenu('all'); openCart(); } else leaveMenu(b.dataset.go);
