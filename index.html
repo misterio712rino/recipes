@@ -53,6 +53,8 @@ header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, v
 header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: var(--paper-line); opacity: .6; }   /* вторая тонкая линия, как рамка на обложке */
 header.scrolled { box-shadow: 0 8px 18px -12px rgba(60,30,10,.25); }
 .wrap { max-width: 1100px; margin: 0 auto; }
+/* на телефоне «Установить» не занимает шапку — пункт есть в меню */
+@media (max-width: 760px) { #installBtn { display: none !important; } }
 .top { display: flex; align-items: center; gap: 4px; min-height: 44px; }
 h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 1.05; margin: 0 0 0 4px; flex: 1; letter-spacing: .01em; color: var(--paper-ink);
      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -315,6 +317,19 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .act-row .btn { flex: 1; }
 .btn .i { flex: none; }
 
+/* Что приготовить? — барабан со случайным блюдом */
+.dice-body { padding: 0 18px calc(18px + var(--safe-b)); }
+.dice-card { margin: 14px 0 4px; border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow-card); }
+.dice-card .media { aspect-ratio: 16/10; }
+.dice-card .media img { opacity: 1; }
+.dice-card .body { padding: 12px 16px 14px; }
+.dice-card h3 { margin: 0 0 6px; font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1.1; }
+.dice-card.spin .media img { filter: blur(2px); }
+.dice-card.spin h3 { opacity: .6; }
+.dice-card.landed { animation: land .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes land { from { transform: scale(.94); } }
+.dice-hint { color: var(--muted); font-size: 13px; text-align: center; margin: 8px 0 0; }
+
 /* Список покупок */
 .cart-body { padding: 0 18px calc(18px + var(--safe-b)); }
 .cart-recipes { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 14px; }
@@ -375,6 +390,7 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
       <button class="btn sq" id="menuBtn" aria-label="Меню" data-i="book"></button>
       <h1 id="title">Рецепты</h1>
       <button class="btn primary" id="installBtn" hidden></button>
+      <button class="btn sq" id="diceBtn" aria-label="Что приготовить? Случайное блюдо" data-i="dice"></button>
       <button class="btn sq" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><span class="dot" id="cartN" hidden></span></button>
       <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
@@ -395,6 +411,19 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 
 <!-- Просмотр рецепта -->
 <div class="sheet" id="viewSheet" role="dialog" aria-modal="true"><div class="panel" id="viewPanel"></div></div>
+
+<!-- Что приготовить? — случайное блюдо на завтрак, обед или ужин -->
+<div class="sheet compact" id="diceSheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="ph-head"><h2 id="dTitle">Что приготовить?</h2><button class="btn sq ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
+    <div class="dice-body">
+      <div class="seg" id="diceSeg"><button data-meal="breakfast">Завтрак</button><button data-meal="lunch">Обед</button><button data-meal="dinner">Ужин</button></div>
+      <div class="dice-card" id="diceCard" aria-live="polite"></div>
+      <div class="act-row"><button class="btn" id="diceAgain" data-i="dice">Ещё вариант</button><button class="btn primary" id="diceOpen">Открыть рецепт</button></div>
+    </div>
+  </div>
+</div>
 
 <!-- Список покупок -->
 <div class="sheet compact" id="cartSheet" role="dialog" aria-modal="true" aria-labelledby="cTitle">
@@ -451,6 +480,7 @@ const MAX_TIME = 240;
 const ICONS = {
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   sliders: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  dice: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor"/>',
   cart: '<path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>',
   timer: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M10 2.5h4M12 2.5V6"/>',
   play: '<path d="M7 4.5v15l12-7.5z"/>',
@@ -948,13 +978,61 @@ $('#cook').addEventListener('touchend', e => {
   if (dx > 0 && cookState.i > 0) { cookState.i--; renderCook(); }
 });
 
+// ---------- Что приготовить? Случайное блюдо на завтрак, обед или ужин ----------
+const inSec = (r, s) => r.sections.includes(s);
+const savory = r => !inSec(r, 'cozy') && !r.tags.includes('Сладкое') && !inSec(r, 'morning') && r.id !== 'hummus';
+const MEALS = {
+  breakfast: r => inSec(r, 'morning'),
+  lunch: r => savory(r) && (inSec(r, 'family') || inSec(r, 'lunchbox')),
+  dinner: r => savory(r) && (inSec(r, 'quick') || inSec(r, 'family') || inSec(r, 'light'))
+};
+const nowHour = new Date().getHours();
+let diceMeal = nowHour < 11 ? 'breakfast' : nowHour < 16 ? 'lunch' : 'dinner', dicePick = null, diceSpin = 0;
+function diceShow(r) {
+  $('#diceCard').innerHTML = `${media(r, true)}<div class="body"><h3>${esc(r.title)}</h3>
+    <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}${r.wait ? ' + ' + fmtTime(r.wait) : ''}</span><span>${icon('flame')}${r.kcal} ккал</span></div></div>`;
+}
+function roll() {
+  const pool = RECIPES.filter(MEALS[diceMeal]);
+  const choices = pool.filter(r => r !== dicePick);   // не повторяем то же блюдо дважды подряд
+  const pick = choices[Math.floor(Math.random() * choices.length)];
+  const card = $('#diceCard'), spin = ++diceSpin;
+  dicePick = pick; $('#diceOpen').disabled = true;
+  document.querySelectorAll('#diceSeg button').forEach(b => b.classList.toggle('on', b.dataset.meal === diceMeal));
+  const land = () => {
+    if (spin !== diceSpin) return;
+    diceShow(pick); card.classList.remove('spin', 'landed'); void card.offsetWidth; card.classList.add('landed');
+    $('#diceOpen').disabled = false;
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+  if (calm) { land(); return; }
+  // барабан: блюда мелькают и замедляются
+  card.classList.add('spin');
+  let i = 0;
+  const step = () => {
+    if (spin !== diceSpin) return;
+    if (i >= 12) { land(); return; }
+    diceShow(pool[Math.floor(Math.random() * pool.length)]);
+    setTimeout(step, 40 + i * i * 1.2); i++;   // ≈ 1,1 с всего
+  };
+  step();
+}
+function openDice() { openSheet('#diceSheet'); roll(); }
+$('#diceBtn').onclick = openDice;
+$('#diceAgain').onclick = roll;
+$('#diceSeg').onclick = e => { const b = e.target.closest('[data-meal]'); if (b) { diceMeal = b.dataset.meal; roll(); } };
+$('#diceOpen').onclick = () => { if (dicePick) openRecipe(dicePick.id); };
+
 // ---------- Установка на телефон ----------
 let deferredPrompt = null;
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 $('#installBtn').innerHTML = icon('download') + 'Установить';
-addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; });
-addEventListener('appinstalled', () => { $('#installBtn').hidden = true; toast('Приложение установлено'); });
+// Можно ли предложить установку: браузер разрешил (Android/компьютер) или iPhone в Safari
+const canInstall = () => !!deferredPrompt || (isIOS && !isStandalone);
+const refreshMenuIfOpen = () => { if (!$('#menu').hidden) renderMenu(); };
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('#installBtn').hidden = false; refreshMenuIfOpen(); });
+addEventListener('appinstalled', () => { deferredPrompt = null; $('#installBtn').hidden = true; refreshMenuIfOpen(); toast('Приложение установлено'); });
 if (isIOS && !isStandalone) $('#installBtn').hidden = false;
 $('#installBtn').onclick = async () => {
   if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('#installBtn').hidden = true; }
@@ -1056,12 +1134,14 @@ if (!calm) $('#viewPanel').addEventListener('scroll', e => {
 function renderMenu() {
   const item = (go, name, n) => `<button class="mi-item${go === 'season' ? ' season' : ''}" data-go="${go}"><span>${go === 'season' ? SEASONS[SEASON].emoji + ' ' : ''}${esc(name)}</span><span class="dots"></span><span class="n">${n}</span></button>`;
   $('#menuList').innerHTML = SECTIONS.map(s => item(s.id, s.title, RECIPES.filter(r => r.sections.includes(s.id)).length)).join('');
-  $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size) + item('cart', 'Список покупок', cart.length);
+  $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size) + item('cart', 'Список покупок', cart.length) +
+    (canInstall() ? item('install', 'Установить приложение', '') : '');
   // «Рецепт дня» меняется раз в сутки; «Продолжить» — последний открытый рецепт
   const d = new Date(), today = RECIPES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % RECIPES.length];
   const last = byId(store.get('lastRecipe', ''));
   $('#menuSpecial').innerHTML = `<button data-open="${today.id}"><i>Рецепт дня —</i> ${esc(today.title)}</button>` +
-    (last && last !== today ? `<button data-open="${last.id}"><i>Продолжить —</i> ${esc(last.title)}</button>` : '');
+    (last && last !== today ? `<button data-open="${last.id}"><i>Продолжить —</i> ${esc(last.title)}</button>` : '') +
+    `<button data-dice><i>Не знаете, что готовить? —</i> Подобрать 🎲</button>`;
 }
 function showMenu(withCover) {
   renderMenu();
@@ -1087,7 +1167,9 @@ Promise.race([document.fonts.load('600 76px "Cormorant Garamond"', 'Меню'), 
 $('#menuCover').onclick = () => { const m = $('#menu'); m.classList.remove('instant'); m.classList.add('opened'); };
 $('#menu').addEventListener('click', e => {
   const open = e.target.closest('[data-open]'); if (open) { leaveMenu('all'); openRecipe(open.dataset.open); return; }
+  if (e.target.closest('[data-dice]')) { leaveMenu('all'); openDice(); return; }
   const b = e.target.closest('[data-go]'); if (!b) return;
+  if (b.dataset.go === 'install') { $('#installBtn').onclick(); return; }   // окно установки поверх меню
   if (b.dataset.go === 'cart') { leaveMenu('all'); openCart(); } else leaveMenu(b.dataset.go);
 });
 $('#menuBtn').onclick = () => { if (history.state && history.state.app) history.back(); else showMenu(false); };
