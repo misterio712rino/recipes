@@ -85,16 +85,6 @@ h1 { font-size: 26px; line-height: 1.1; margin: 0; flex: 1; letter-spacing: -.02
 
 /* ---------- Главная: ленты по разделам ---------- */
 main { padding: 4px 16px calc(40px + var(--safe-b)); }
-.row { margin: 10px 0 26px; }
-.row-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.row-head h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
-.row-head button { color: var(--accent); font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
-.row-head button .i { width: 16px; height: 16px; }
-.strip { display: grid; grid-auto-flow: column; grid-auto-columns: min(72%, 260px); gap: 14px; overflow-x: auto; scrollbar-width: none;
-         margin: 0 -16px; padding: 2px 16px 10px; scroll-snap-type: x mandatory; scroll-padding: 16px; }
-.strip::-webkit-scrollbar { display: none; }
-.strip .card { scroll-snap-align: start; }
-.strip .card h3 { font-size: 16px; }
 
 /* ---------- Список ---------- */
 .count { color: var(--muted); font-size: 14px; margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -192,7 +182,7 @@ main { padding: 4px 16px calc(40px + var(--safe-b)); }
 .pp .swap .hand { display: block; font-family: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive; font-weight: 600; font-size: 23px; line-height: 1; color: var(--pen); transform: rotate(-2.5deg); transform-origin: left bottom; margin: 0 0 1px 4px; animation: write .6s ease-out both; }
 .pp .swap s { color: var(--muted); background: linear-gradient(var(--pen), var(--pen)) no-repeat 0 58% / 100% 2px; animation: strike .35s ease-out both; }
 .ing input:checked + span .hand { opacity: .55; }
-.ing:not(.pp) + .pp-hint { display: none; }
+.ing:not(.pp) ~ .pp-hint { display: none; }
 .pp-hint .i { color: var(--pp); }
 .stat .swap .hand { margin: -4px 0 1px; transform-origin: center; font-size: 22px; }
 .pp .stat .swap s { font-weight: 500; font-size: 13px; }
@@ -258,7 +248,8 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .mi-page > * { opacity: 0; transform: translateY(6px); transition: opacity .45s ease, transform .45s ease; }
 .menu.opened .mi-page > * { opacity: 1; transform: none; }
 .menu.opened .mi-page > :nth-child(2) { transition-delay: .55s; } .menu.opened .mi-page > :nth-child(3) { transition-delay: .6s; }
-.menu.opened .mi-page > :nth-child(4) { transition-delay: .7s; } .menu.opened .mi-page > :nth-child(5) { transition-delay: .85s; }
+.menu.opened .mi-page > :nth-child(4) { transition-delay: .65s; } .menu.opened .mi-page > :nth-child(5) { transition-delay: .75s; }
+.menu.opened .mi-page > :nth-child(6) { transition-delay: .9s; }
 .menu.instant .mi-page > *, .menu.instant .menu-inside::before { transition: none !important; }
 /* обложка: лицевая сторона и оборот, поворачивается вокруг левого края */
 .menu-cover { position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d; transition: transform 1.15s cubic-bezier(.55,.05,.2,1), visibility 0s 1.15s; }
@@ -277,6 +268,50 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 .cover-hint { position: absolute; bottom: calc(56px + var(--safe-b)); font-size: 14px; color: var(--muted); animation: hint 2.4s ease-in-out infinite; }
 @keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
+/* «Рецепт дня» и «Продолжить» на развороте меню */
+.mi-special { margin: -6px 0 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.mi-special button { font-family: var(--serif); font-size: 19px; color: var(--paper-ink); padding: 4px 0; }
+.mi-special i { color: var(--muted); }
+.mi-special button:active { color: var(--accent); }
+
+/* ПП-калории на карточке */
+.meta .pp-mark { color: var(--pp); display: inline-flex; align-items: center; gap: 3px; font-weight: 600; }
+.meta .pp-mark .i { width: 14px; height: 14px; }
+
+/* Кнопки под ингредиентами и шагами */
+.act-row { display: flex; gap: 8px; margin-top: 12px; }
+.act-row .btn { flex: 1; }
+.btn .i { flex: none; }
+
+/* Список покупок */
+.cart-body { padding: 0 18px calc(18px + var(--safe-b)); }
+.cart-recipes { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 14px; }
+.cart-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 5px 6px 5px 12px; font-size: 13px; }
+.cart-chip small { color: var(--muted); }
+.cart-chip button { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+.cart-chip button .i { width: 14px; height: 14px; }
+.cart-empty { color: var(--muted); text-align: center; padding: 30px 10px 40px; line-height: 1.5; }
+.ing .from { display: block; font-size: 12px; color: var(--muted); }
+
+/* Режим готовки: шаги по одному и таймер */
+.cook { position: fixed; inset: 0; z-index: 45; background: var(--bg); display: flex; flex-direction: column;
+  padding: calc(12px + var(--safe-t)) 18px calc(16px + var(--safe-b)); }
+.cook-top { display: flex; align-items: center; gap: 10px; }
+.cook-top .ttl { flex: 1; min-width: 0; }
+.cook-top .ttl b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cook-top .ttl span { font-size: 13px; color: var(--muted); }
+.cook-bar { height: 4px; background: var(--line); border-radius: 2px; margin: 12px 0 0; overflow: hidden; }
+.cook-bar i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.cook-step { flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; padding: 20px 4px; }
+.cook-step .num { font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+.cook-step p { font-size: 25px; line-height: 1.4; margin: 0; letter-spacing: -.01em; }
+.cook-timers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.timer-pill { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.timer-pill.run { background: var(--accent); color: var(--accent-ink); }
+.cook-nav { display: flex; gap: 10px; }
+.cook-nav .btn { flex: 1; height: 54px; font-size: 16px; }
+.timer-float { position: fixed; left: 50%; bottom: calc(84px + var(--safe-b)); transform: translateX(-50%); z-index: 55; box-shadow: var(--shadow); }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -289,6 +324,7 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
       <div class="mi-kicker">Мои рецепты</div>
       <h2 class="mi-title">Меню</h2>
       <div class="mi-orn">✦</div>
+      <div class="mi-special" id="menuSpecial"></div>
       <nav class="mi-list" id="menuList" aria-label="Разделы меню"></nav>
       <div class="mi-list mi-extra" id="menuExtra"></div>
     </div>
@@ -305,6 +341,7 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
       <button class="btn sq" id="menuBtn" aria-label="Меню" data-i="book"></button>
       <h1 id="title">Рецепты</h1>
       <button class="btn primary" id="installBtn" hidden></button>
+      <button class="btn sq" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><span class="dot" id="cartN" hidden></span></button>
       <button class="btn sq" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
     <div class="search-row">
@@ -323,6 +360,19 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
 
 <!-- Просмотр рецепта -->
 <div class="sheet" id="viewSheet" role="dialog" aria-modal="true"><div class="panel" id="viewPanel"></div></div>
+
+<!-- Список покупок -->
+<div class="sheet compact" id="cartSheet" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="ph-head"><h2 id="cTitle">Список покупок</h2><button class="btn sq ghost" data-close aria-label="Закрыть" data-i="x"></button></div>
+    <div class="cart-body" id="cartBody"></div>
+  </div>
+</div>
+
+<!-- Режим готовки -->
+<div class="cook" id="cook" role="dialog" aria-modal="true" aria-label="Режим готовки" hidden></div>
+<button class="timer-pill run timer-float" id="timerFloat" hidden></button>
 
 <!-- Фильтры -->
 <div class="sheet compact" id="filterSheet" role="dialog" aria-modal="true" aria-labelledby="fTitle">
@@ -366,6 +416,10 @@ const MAX_TIME = 240;
 const ICONS = {
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   sliders: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  cart: '<path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>',
+  timer: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M10 2.5h4M12 2.5V6"/>',
+  play: '<path d="M7 4.5v15l12-7.5z"/>',
+  trash: '<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>',
   book: '<path d="M3 5.5c2.5-1 5.5-1 9 1 3.5-2 6.5-2 9-1v13c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1z"/><path d="M12 6.5v13"/>',
   heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -404,6 +458,11 @@ try { localStorage.removeItem('userRecipes'); } catch {}   // своих рец�
 
 const ids = new Set(RECIPES.map(r => r.id));
 let favorites = new Set(store.get('favorites', []).filter(id => ids.has(id)));
+// Рецепты, у которых включена ПП-версия (видно и в рецепте, и на карточке)
+const ppSet = new Set(store.get('pp', []).filter(id => ids.has(id)));
+// Список покупок: какие рецепты, на сколько порций и в какой версии; отмеченные продукты — по ключу
+let cart = store.get('cart', []).filter(c => ids.has(c.id));
+const cartDone = new Set(store.get('cartDone', []));
 const freshFilters = () => ({ maxTime: MAX_TIME, kcal: new Set(), tags: new Set(), sort: 'default' });
 const state = Object.assign({ q: '', section: 'all', favOnly: false }, freshFilters());
 
@@ -452,13 +511,13 @@ function media(r, eager) {
 }
 
 function card(r, i, eager) {
-  const on = favorites.has(r.id);
+  const on = favorites.has(r.id), ppK = ppSet.has(r.id) ? ppKcal(r) : r.kcal;
   return `<article class="card" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i, 8) * 30}ms" tabindex="0" aria-label="${esc(r.title)}">
       ${media(r, eager)}
       <button class="fav ${on ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}">${icon('heart', on)}</button>
       <div class="body">
         <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}${r.wait ? ' + ' + fmtTime(r.wait) : ''}</span><span>${icon('flame')}${r.kcal} ккал</span></div>
+        <div class="meta"><span>${icon('clock')}${fmtTime(r.time)}${r.wait ? ' + ' + fmtTime(r.wait) : ''}</span><span>${icon('flame')}${ppK} ккал</span>${ppSet.has(r.id) ? `<span class="pp-mark">${icon('leaf')}ПП</span>` : ''}</div>
       </div>
     </article>`;
 }
@@ -537,18 +596,6 @@ function emptyState() {
 
 function render() {
   const main = $('#main');
-  // Главная без поиска и фильтров — ленты по разделам
-  if (state.section === 'all' && !state.favOnly && !narrowed()) {
-    main.innerHTML = SECTIONS.map(s => {
-      const list = RECIPES.filter(r => r.sections.includes(s.id));
-      return `<section class="row">
-        <div class="row-head"><h2>${s.title}</h2><button data-sec="${s.id}">Все ${list.length}${icon('next')}</button></div>
-        <div class="strip">${list.map((r, i) => card(r, i, s === SECTIONS[0] && i < 2)).join('')}</div>
-      </section>`;
-    }).join('');
-    $('#applyBtn').textContent = `Показать ${RECIPES.length}`;
-    return;
-  }
   const list = filtered();
   $('#applyBtn').textContent = list.length ? `Показать ${list.length}` : 'Ничего не найдено';
   main.innerHTML = `
@@ -615,9 +662,13 @@ function closeSheets(fromHistory) {
   if (!fromHistory && history.state && history.state.sheet) history.back();
 }
 // «Назад»: сначала закрываются панели, а из списка рецептов возвращаемся в меню
-addEventListener('popstate', () => { closeSheets(true); if (!history.state) showMenu(false); });
+// Режим готовки лежит поверх рецепта: «Назад» сначала закрывает только его
+addEventListener('popstate', () => {
+  if (!$('#cook').hidden) { closeCook(true); return; }
+  closeSheets(true); if (!history.state) showMenu(false);
+});
 document.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#cook').hidden) closeCook(); else closeSheets(); } });
 
 // Экран не гаснет, пока открыт рецепт (если телефон поддерживает)
 let wake = null;
@@ -638,8 +689,8 @@ function openRecipe(id) {
   const showWakeHint = 'wakeLock' in navigator && !store.get('wakeHint', false);
   if (showWakeHint) store.set('wakeHint', true);
   const swaps = r.ingredients.map(ppSwap), ppCount = swaps.filter(s => s.pp).length;
-  const ppIds = new Set(store.get('pp', []));
-  let ppOn = ppIds.has(id) && ppCount > 0;
+  let ppOn = ppSet.has(id) && ppCount > 0;
+  store.set('lastRecipe', id);   // для строки «Продолжить» в меню
   const ppK = ppKcal(r), kcalNow = () => ppOn ? ppK : r.kcal;
   $('#viewPanel').innerHTML = `
     <div class="hero">
@@ -671,9 +722,11 @@ function openRecipe(id) {
       <ul class="ing${ppOn ? ' pp' : ''}">${swaps.map((s, n) => `<li><label><input type="checkbox" data-n="${n}" ${checked.has(n) ? 'checked' : ''}><span>${s.pp
         ? `<span class="swap"><span class="hand">${esc(s.pp)}</span><s>${esc(s.name)}</s><span class="q">${esc(s.rest)}</span></span>`
         : `${esc(s.name)}<span class="q">${esc(s.rest)}</span>`}</span></label></li>`).join('')}</ul>
+      <div class="act-row"><button class="btn" id="vCart">${icon('cart')}<span id="vCartTxt"></span></button></div>
       ${ppCount ? `<div class="note pp-hint">${icon('leaf')}В шагах ниже используйте продукты, вписанные от руки</div>` : ''}
       <div class="sec-h"><h4>Приготовление</h4></div>
-      <ol class="steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <ol class="steps" id="vSteps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <div class="act-row"><button class="btn primary" id="vCook">${icon('play')}Начать готовить</button></div>
       ${showWakeHint ? `<div class="note">${icon('sun')}Экран не погаснет, пока открыт рецепт</div>` : ''}
     </div>`;
   refreshFavButton(id);
@@ -685,31 +738,186 @@ function openRecipe(id) {
   $('#vUncheck').onclick = () => { checked.clear(); store.set('checked:' + id, []); $('#viewPanel').querySelectorAll('.ing input').forEach(c => c.checked = false); syncUncheck(); };
   $('#vFav').onclick = () => toggleFav(r.id);
   if (ppCount) $('#vPP').onclick = () => {
-    ppOn = !ppOn; ppOn ? ppIds.add(id) : ppIds.delete(id); store.set('pp', [...ppIds]);
+    ppOn = !ppOn; ppOn ? ppSet.add(id) : ppSet.delete(id); store.set('pp', [...ppSet]);
     $('#vPP').setAttribute('aria-checked', ppOn); $('#viewPanel .ing').classList.toggle('pp', ppOn);
     $('#viewPanel .stats').classList.toggle('pp', ppOn); setPortions(portions);
+    render();   // карточка под рецептом тоже покажет ПП-калории
   };
-  // Калькулятор порций: пересчитываем только количества, отметки и ПП-замены остаются
+  // Калькулятор порций: пересчитываем количества в ингредиентах и шагах, отметки и ПП-замены остаются
   let portions = r.servings;
+  const inCart = () => cart.find(c => c.id === id);
+  const syncCartBtn = () => {
+    const c = inCart(), same = c && c.portions === portions && c.pp === ppOn;
+    $('#vCartTxt').textContent = !c ? 'В список покупок' : same ? 'В списке покупок ✓' : 'Обновить в списке покупок';
+    $('#vCart').classList.toggle('on', !!same);
+  };
   const setPortions = n => {
     portions = Math.min(24, Math.max(1, n));
     const k = portions / r.servings, word = unitWord(r, portions);
     $('#sN').textContent = portions; $('#sLbl').textContent = word;
     $('#sMinus').disabled = portions <= 1; $('#sPlus').disabled = portions >= 24;
     $('#viewPanel').querySelectorAll('.ing .q').forEach((q, n) => q.textContent = scaleQty(swaps[n].rest, k));
+    $('#vSteps').querySelectorAll('li').forEach((li, n) => li.textContent = scaleSteps(r.steps[n], k));
     $('#vScaled').hidden = k === 1;
     $('#vScaledTxt').textContent = `Пересчитано на ${portions} ${unitWord(r, portions, true)} · ≈ ${kcalNow() * portions} ккал всего`;
+    syncCartBtn();
   };
+  $('#vCart').onclick = () => {
+    const c = inCart();
+    if (c && c.portions === portions && c.pp === ppOn) { openCart(); return; }
+    if (c) Object.assign(c, { portions, pp: ppOn }); else cart.push({ id, portions, pp: ppOn });
+    saveCart(); syncCartBtn();
+    toast(c ? 'Список покупок обновлён' : 'Добавлено в список покупок', 'Открыть', openCart);
+  };
+  $('#vCook').onclick = () => startCook(r, r.steps.map(s => scaleSteps(s, portions / r.servings)));
   $('#sMinus').onclick = () => setPortions(portions - 1);
   $('#sPlus').onclick = () => setPortions(portions + 1);
   $('#vScaleReset').onclick = () => setPortions(r.servings);
   setPortions(portions);
   if (canShare) $('#vShare').onclick = () => navigator.share({ title: r.title + (ppOn ? ' (ПП-версия)' : ''),
-    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${unitWord(r, portions)}, ≈ ${kcalNow()} ккал ${unitOf(r)[4]}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` }).catch(() => {});
+    text: `${r.title}${ppOn ? ' (ПП-версия)' : ''}\n${portions} ${unitWord(r, portions)}, ≈ ${kcalNow()} ккал ${unitOf(r)[4]}\n\nИнгредиенты:\n${swaps.map(s => '• ' + (ppOn && s.pp ? s.pp : s.name) + scaleQty(s.rest, portions / r.servings)).join('\n')}\n\nПриготовление:\n${r.steps.map((s, i) => `${i + 1}. ${scaleSteps(s, portions / r.servings)}`).join('\n')}` }).catch(() => {});
   openSheet('#viewSheet');
   $('#viewPanel').scrollTop = 0;
   keepAwake();
 }
+
+// ---------- Список покупок ----------
+// Одинаковые продукты из разных рецептов складываются, если количество указано одним числом в одних единицах
+const productKey = name => norm(name).split(/[\s,]+/).filter(Boolean).map(stem).join(' ');
+function cartItems() {
+  const items = new Map();
+  for (const c of cart) {
+    const r = byId(c.id), k = c.portions / r.servings;
+    for (const s of r.ingredients.map(ppSwap)) {
+      const name = c.pp && s.pp ? s.pp : s.name, rest = scaleQty(s.rest, k), q = parseQty(rest);
+      const key = productKey(name) + '|' + (q ? q.key : rest);
+      const it = items.get(key) || { key, name, n: 0, q, rest, from: new Set() };
+      if (q) it.n += q.n;
+      it.from.add(r.title); items.set(key, it);
+    }
+  }
+  // штучное в магазине покупают целиком: 2,5 луковицы → 3
+  const whole = it => it.q && (it.q.key === 'шт.' || WORD_FORMS[it.q.key]) ? Math.ceil(it.n - 1e-9) : it.n;
+  return [...items.values()].map(it => ({ ...it, text: it.name + (it.q ? ' — ' + it.q.show(whole(it)) : it.rest) }));
+}
+function saveCart() {
+  store.set('cart', cart);
+  // отметки остаются только у продуктов, которые ещё есть в списке
+  const keys = new Set(cartItems().map(i => i.key));
+  [...cartDone].forEach(k => keys.has(k) || cartDone.delete(k)); store.set('cartDone', [...cartDone]);
+  syncCartDot();
+}
+function syncCartDot() { const n = $('#cartN'); n.hidden = !cart.length; n.textContent = cart.length; }
+function renderCart() {
+  const body = $('#cartBody');
+  if (!cart.length) { body.innerHTML = `<div class="cart-empty">Список пуст.<br>Откройте рецепт и нажмите «В список покупок» — продукты появятся здесь.</div>`; return; }
+  const items = cartItems(), left = items.filter(i => !cartDone.has(i.key)).length;
+  body.innerHTML = `
+    <div class="cart-recipes">${cart.map(c => { const r = byId(c.id); return `<span class="cart-chip">${esc(r.title)} <small>· ${c.portions} ${unitWord(r, c.portions)}${c.pp ? ' · ПП' : ''}</small><button data-uncart="${esc(c.id)}" aria-label="Убрать «${esc(r.title)}» из списка">${icon('x')}</button></span>`; }).join('')}</div>
+    <div class="count"><span>${left ? `Осталось купить: ${left}` : 'Всё куплено'}</span></div>
+    <ul class="ing">${items.map(i => `<li><label><input type="checkbox" data-key="${esc(i.key)}" ${cartDone.has(i.key) ? 'checked' : ''}><span>${esc(i.text)}${cart.length > 1 ? `<span class="from">${esc([...i.from].join(', '))}</span>` : ''}</span></label></li>`).join('')}</ul>
+    <div class="act-row">${navigator.share ? `<button class="btn" id="cartShare">${icon('share')}Поделиться</button>` : ''}<button class="btn" id="cartClear">${icon('trash')}Очистить</button></div>`;
+  body.querySelectorAll('input[data-key]').forEach(cb => cb.onchange = () => {
+    cb.checked ? cartDone.add(cb.dataset.key) : cartDone.delete(cb.dataset.key); store.set('cartDone', [...cartDone]); renderCart();
+  });
+  body.querySelectorAll('[data-uncart]').forEach(b => b.onclick = () => { cart = cart.filter(c => c.id !== b.dataset.uncart); saveCart(); renderCart(); });
+  $('#cartClear').onclick = () => { if (confirm('Очистить список покупок?')) { cart = []; cartDone.clear(); saveCart(); renderCart(); } };
+  if (navigator.share) $('#cartShare').onclick = () => navigator.share({ title: 'Список покупок',
+    text: 'Список покупок:\n' + items.filter(i => !cartDone.has(i.key)).map(i => '• ' + i.text).join('\n') }).catch(() => {});
+}
+function openCart() { renderCart(); openSheet('#cartSheet'); }
+$('#cartBtn').onclick = openCart;
+
+// ---------- Режим готовки ----------
+// Время в шаге («варите 20 минут», «3–4 минуты», «1,5 часа») превращается в кнопку таймера; берём меньшее значение
+function stepTimers(text) {
+  const out = [];
+  for (const m of text.matchAll(/(\d+(?:,\d+)?)(?:–\d+(?:,\d+)?)? ?(секунд|минут|час)/gi)) {
+    const n = toNum(m[1]), unit = m[2].toLowerCase(), sec = unit === 'секунд' ? n : unit === 'час' ? n * 3600 : n * 60;
+    if (sec >= 10 && !out.some(t => t.sec === sec)) out.push({ sec, label: sec < 60 ? `${n} сек` : fmtTime(Math.round(sec / 60)) });
+  }
+  return out;
+}
+let timer = null;   // { end, label, h }
+const fmtLeft = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+function startTimer(sec, label) {
+  stopTimer();
+  timer = { end: Date.now() + sec * 1000, label };
+  timer.h = setInterval(tickTimer, 500); tickTimer();
+}
+function stopTimer() { if (timer) clearInterval(timer.h); timer = null; $('#timerFloat').hidden = true; document.querySelectorAll('[data-timer-run]').forEach(e => e.remove()); }
+function tickTimer() {
+  if (!timer) return;
+  const left = Math.max(0, Math.round((timer.end - Date.now()) / 1000));
+  const txt = `⏱ ${fmtLeft(left)} · ${timer.label}`;
+  const run = $('#cook').querySelector('[data-timer-run]');
+  if (run) run.textContent = txt + '  ✕';
+  const f = $('#timerFloat'); f.hidden = !$('#cook').hidden; f.textContent = txt + ' — стоп';
+  if (left === 0) { const label = timer.label; stopTimer(); ring(); toast(`Таймер «${label}» — время вышло!`); }
+}
+// Сигнал: три коротких писка и вибрация
+function ring() {
+  if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, .45, .9].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(.25, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + t + .35);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + .36);
+    });
+  } catch {}
+}
+$('#timerFloat').onclick = stopTimer;
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tickTimer(); });
+
+let cookState = null;   // { r, steps, i }
+function startCook(r, steps) {
+  cookState = { r, steps, i: 0 };
+  $('#cook').hidden = false; renderCook();
+  history.pushState({ cook: 1 }, '');
+}
+function closeCook(fromHistory) {
+  if ($('#cook').hidden) return;
+  $('#cook').hidden = true; tickTimer();
+  if (!fromHistory && history.state && history.state.cook) history.back();
+}
+function renderCook() {
+  const { r, steps, i } = cookState, last = i === steps.length - 1;
+  $('#cook').innerHTML = `
+    <div class="cook-top">
+      <button class="btn sq" id="ckClose" aria-label="Выйти из режима готовки">${icon('x')}</button>
+      <div class="ttl"><b>${esc(r.title)}</b><span>Шаг ${i + 1} из ${steps.length}</span></div>
+    </div>
+    <div class="cook-bar"><i style="width:${(i + 1) / steps.length * 100}%"></i></div>
+    <div class="cook-step">
+      <div class="num">Шаг ${i + 1}</div>
+      <p>${esc(steps[i])}</p>
+      <div class="cook-timers">
+        ${timer ? `<button class="timer-pill run" data-timer-run>${''}</button>` : ''}
+        ${stepTimers(steps[i]).filter(t => !timer || timer.label !== t.label).map(t => `<button class="timer-pill" data-sec="${t.sec}" data-label="${esc(t.label)}">${icon('timer')}Таймер ${esc(t.label)}</button>`).join('')}
+      </div>
+    </div>
+    <div class="cook-nav">
+      <button class="btn" id="ckPrev" ${i ? '' : 'disabled'}>${icon('back')}Назад</button>
+      <button class="btn primary" id="ckNext">${last ? 'Готово!' : 'Далее'}${last ? '' : icon('next')}</button>
+    </div>`;
+  tickTimer();
+  $('#ckClose').onclick = () => closeCook();
+  $('#ckPrev').onclick = () => { cookState.i--; renderCook(); };
+  $('#ckNext').onclick = () => { if (last) { closeCook(); toast('Приятного аппетита!'); } else { cookState.i++; renderCook(); } };
+  $('#cook').querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { startTimer(+b.dataset.sec, b.dataset.label); renderCook(); });
+  const run = $('#cook').querySelector('[data-timer-run]'); if (run) run.onclick = () => { stopTimer(); renderCook(); };
+}
+// Свайп влево/вправо листает шаги
+let touchX = null;
+$('#cook').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+$('#cook').addEventListener('touchend', e => {
+  if (touchX === null || !cookState) return;
+  const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+  if (Math.abs(dx) < 60) return;
+  if (dx < 0 && cookState.i < cookState.steps.length - 1) { cookState.i++; renderCook(); }
+  if (dx > 0 && cookState.i > 0) { cookState.i--; renderCook(); }
+});
 
 // ---------- Установка на телефон ----------
 let deferredPrompt = null;
@@ -746,7 +954,12 @@ if ('serviceWorker' in navigator) {
 function renderMenu() {
   const item = (go, name, n) => `<button class="mi-item" data-go="${go}"><span>${esc(name)}</span><span class="dots"></span><span class="n">${n}</span></button>`;
   $('#menuList').innerHTML = SECTIONS.map(s => item(s.id, s.title, RECIPES.filter(r => r.sections.includes(s.id)).length)).join('');
-  $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size);
+  $('#menuExtra').innerHTML = item('all', 'Все рецепты', RECIPES.length) + item('fav', 'Избранное', favorites.size) + item('cart', 'Список покупок', cart.length);
+  // «Рецепт дня» меняется раз в сутки; «Продолжить» — последний открытый рецепт
+  const d = new Date(), today = RECIPES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % RECIPES.length];
+  const last = byId(store.get('lastRecipe', ''));
+  $('#menuSpecial').innerHTML = `<button data-open="${today.id}"><i>Рецепт дня —</i> ${esc(today.title)}</button>` +
+    (last && last !== today ? `<button data-open="${last.id}"><i>Продолжить —</i> ${esc(last.title)}</button>` : '');
 }
 function showMenu(withCover) {
   renderMenu();
@@ -770,7 +983,11 @@ function leaveMenu(go) {
 Promise.race([document.fonts.load('600 76px "Cormorant Garamond"', 'Меню'), new Promise(r => setTimeout(r, 1500))])
   .finally(() => $('#menu').classList.add('font-ready'));
 $('#menuCover').onclick = () => { const m = $('#menu'); m.classList.remove('instant'); m.classList.add('opened'); };
-$('#menu').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) leaveMenu(b.dataset.go); });
+$('#menu').addEventListener('click', e => {
+  const open = e.target.closest('[data-open]'); if (open) { leaveMenu('all'); openRecipe(open.dataset.open); return; }
+  const b = e.target.closest('[data-go]'); if (!b) return;
+  if (b.dataset.go === 'cart') { leaveMenu('all'); openCart(); } else leaveMenu(b.dataset.go);
+});
 $('#menuBtn').onclick = () => { if (history.state && history.state.app) history.back(); else showMenu(false); };
 
 // Быстрые действия с иконки приложения (долгое нажатие на Android): #fav или #<раздел> — сразу к рецептам
@@ -782,6 +999,19 @@ if (startHash === 'fav' || sectionById(startHash)) {
 } else showMenu(true);
 update();
 centerTab();
+syncCartDot();
+
+// Все фото заранее в память телефона — чтобы приложение целиком работало без интернета.
+// При каждом запуске докачиваем только то, чего в памяти нет (телефон мог её почистить); не в режиме экономии трафика
+if ('serviceWorker' in navigator && 'caches' in window && !(navigator.connection && navigator.connection.saveData)) {
+  navigator.serviceWorker.ready.then(() => setTimeout(async () => {
+    const c = await caches.open('images');
+    for (const r of RECIPES) {
+      if (!r.image || !navigator.onLine) continue;
+      if (!(await c.match(new URL(r.image, location.href).href))) await fetch(r.image).catch(() => {});   // кладёт в память service worker
+    }
+  }, 4000));
+}
 </script>
 </body>
 </html>

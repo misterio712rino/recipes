@@ -522,3 +522,24 @@ function ppKcal(r) {
 // Тег «Быстро» ставится сам: всё, что вместе с ожиданием готовится не дольше QUICK_MIN минут
 const QUICK_MIN = 25;
 RECIPES.forEach(r => { if (r.time + (r.wait || 0) <= QUICK_MIN) r.tags.push('Быстро'); });
+
+// Количества внутри шагов («залейте 300 мл кипятка») для калькулятора порций.
+// Меняются только вес и объём (г, кг, мл, л, ложки); время, градусы и сантиметры остаются
+function scaleSteps(text, k) {
+  if (k === 1) return text;
+  return text.replace(/(\d+(?:,\d+)?) ?(кг|г|мл|л|ст\. л\.|ч\. л\.)(?![а-яё])/g, (m, n, u) => fmtQty(toNum(n) * k, u) + ' ' + u);
+}
+
+// Разбор количества для списка покупок: « — 300 г» → { n: 300, key: 'г', show } — чтобы складывать одинаковые продукты.
+// Диапазоны, «+», «по» и слова без числа не складываются — вернётся null
+function parseQty(rest) {
+  const m = rest.match(/^ — (\d+(?:,\d+)?|[½¼¾]) ?(кг|г|мл|л|шт\.|ст\. л\.|ч\. л\.|[а-яё]+)$/);
+  if (!m) return null;
+  let n = toNum(m[1]), unit = m[2];
+  if (unit === 'кг') { n *= 1000; unit = 'г'; }
+  if (unit === 'л') { n *= 1000; unit = 'мл'; }
+  const stem = Object.keys(WORD_FORMS).find(st => unit.startsWith(st));
+  if (stem) return { n, key: stem, show: v => fmtQty(v, '') + ' ' + wordForm(stem, v) };
+  if (!['г', 'мл', 'шт.', 'ст. л.', 'ч. л.'].includes(unit)) return null;
+  return { n, key: unit, show: v => fmtQty(v, unit) + ' ' + unit };
+}
