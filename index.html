@@ -37,7 +37,13 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scrollbar-width: thin; scrollbar-color: var(--paper-line) transparent; }
+/* Полоса прокрутки: тонкая, в цвет бумаги; в окнах (рецепт, покупки…) её нет — листается так же */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--paper-line); border-radius: 4px; }
+.panel, .menu-inside { scrollbar-width: none; }
+.panel::-webkit-scrollbar, .menu-inside::-webkit-scrollbar { display: none; }
 body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text);
        -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
 body.lock { overflow: hidden; }
@@ -48,7 +54,7 @@ button { cursor: pointer; background: none; border: none; padding: 0; }
 
 /* ---------- Шапка: в стиле ресторанного меню, как обложка ---------- */
 header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 93%, transparent);
-         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(8px + var(--safe-t)) 16px 0;
+         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(8px + var(--safe-t)) 16px 12px;
          border-bottom: 1px solid var(--paper-line); transition: box-shadow .2s; }
 header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: var(--paper-line); opacity: .6; }   /* вторая тонкая линия, как рамка на обложке */
 header.scrolled { box-shadow: 0 8px 18px -12px rgba(60,30,10,.25); }
@@ -56,10 +62,11 @@ header.scrolled { box-shadow: 0 8px 18px -12px rgba(60,30,10,.25); }
 /* на телефоне «Установить» не занимает шапку — пункт есть в меню */
 @media (max-width: 760px) { #installBtn { display: none !important; } }
 .top { display: flex; align-items: center; gap: 4px; min-height: 44px; }
-h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 1.05; margin: 0 0 0 4px; flex: 1; letter-spacing: .01em; color: var(--paper-ink);
-     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 480px) { h1 { font-size: 27px; white-space: normal; } }
-@media (max-width: 360px) { h1 { font-size: 24px; } }
+.top-sp { flex: 1; }
+/* Название раздела — отдельной строкой по центру, между тонкими линиями, как заголовок страницы меню */
+h1 { font-family: var(--serif); font-size: 30px; font-weight: 600; line-height: 1.1; margin: 0; letter-spacing: .01em; color: var(--paper-ink);
+     text-align: center; max-width: 80%; }
+@media (max-width: 480px) { h1 { font-size: 26px; } }
 /* значки в шапке — без рамок, как на бумаге */
 .top .btn.sq { border-color: transparent; background: transparent; border-radius: 50%; color: var(--paper-ink); }
 .top .btn.sq.on { background: var(--accent-soft); color: var(--accent); }
@@ -68,7 +75,7 @@ h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 
 .top .btn.lbl small { font-size: 10.5px; font-weight: 500; line-height: 1; color: var(--muted); }
 .top .btn.lbl.on small { color: var(--accent); }
 .top .btn.lbl .dot { top: -2px; right: 2px; }
-.hdr-orn { display: flex; align-items: center; gap: 12px; color: var(--paper-line); font-size: 11px; margin: 4px 0 8px; }
+.hdr-orn { display: flex; align-items: center; gap: 14px; color: var(--paper-line); margin: 0 0 10px; }
 .hdr-orn::before, .hdr-orn::after { content: ""; flex: 1; height: 1px; background: currentColor; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 14px; border-radius: 12px;
        background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 500; white-space: nowrap; transition: transform .1s; position: relative; }
@@ -92,16 +99,6 @@ h1 { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 
 .search-row .btn { height: 44px; width: 44px; padding: 0; border-radius: 50%; background: var(--paper); border-color: var(--paper-line); color: var(--paper-ink); }
 .search-row .btn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
-/* Вкладки-разделы: текстом, как строки меню, через точку; выбранная подчёркнута */
-.sections { position: relative; display: flex; overflow-x: auto; scrollbar-width: none; margin: 4px -16px 0; padding: 0 10px 2px; }
-.sections::-webkit-scrollbar { display: none; }
-.sec-tab { flex: none; position: relative; display: flex; align-items: center; height: 42px; padding: 0 13px; white-space: nowrap;
-           font-family: var(--serif); font-size: 20px; font-weight: 500; color: var(--muted); transition: color .2s; }
-.sec-tab + .sec-tab::before { content: "·"; position: absolute; left: -3px; color: var(--paper-line); font-weight: 600; }
-.sec-tab.on { color: var(--paper-ink); font-weight: 600; }
-.sec-tab::after { content: ""; position: absolute; left: 13px; right: 13px; bottom: 6px; height: 2px; border-radius: 1px; background: var(--accent);
-                  transform: scaleX(0); transition: transform .25s ease; }
-.sec-tab.on::after { transform: scaleX(1); }
 
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
@@ -191,12 +188,27 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 12px; font-weight: 500; background: var(--surface-2); color: var(--muted); padding: 5px 10px; border-radius: 999px; }
 .tag.sec { background: var(--accent-soft); color: var(--accent); }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 6px; }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; text-align: center; }
-.stat .i { margin: 0 auto 6px; color: var(--accent); }
-.stat b { display: block; font-size: 15px; }
-.stat > span { font-size: 12px; color: var(--muted); }
-.stat.portions { padding: 8px 4px 12px; }
+/* Паспорт блюда: время, калории, порции и БЖУ — одной карточкой, как в меню ресторана */
+.stats { margin: 18px 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; }
+.facts-row { display: grid; grid-template-columns: repeat(3, 1fr); }
+.stat { padding: 14px 6px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat .i { width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px; }
+.stat .lbl { font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.stat b, .mac b { font-variant-numeric: lining-nums; }
+.stat b { display: block; font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.1; margin: 2px 0 1px; }
+.stat > small { font-size: 11.5px; color: var(--muted); line-height: 1.25; }
+.stat.portions { padding-bottom: 10px; }
+.macros-h { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 0; border-top: 1px dashed var(--line);
+  font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 8px 16px 16px; }
+.mac { min-width: 0; }
+.mac .lbl { display: block; font-size: 12.5px; color: var(--muted); }
+.mac b { display: block; font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.15; }
+.mac b small { font-family: system-ui, sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 2px; }
+.mac i { display: block; height: 5px; border-radius: 3px; background: var(--surface-2); margin-top: 6px; overflow: hidden; }
+.mac i s { display: block; height: 100%; border-radius: 3px; transition: width .4s ease; }
+.mac.p i s { background: #4f9a63; } .mac.f i s { background: #e3a43f; } .mac.c i s { background: var(--accent); }
 .stepper { display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; }
 .stepper b { min-width: 26px; font-size: 18px; }
 .stepper button { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
@@ -234,8 +246,8 @@ main { position: relative; z-index: 1; }   /* шапка уже над фоно�
 .ing input:checked + span .hand { opacity: .55; }
 .ing:not(.pp) ~ .pp-hint { display: none; }
 .pp-hint .i { color: var(--pp); }
-.stat .swap .hand { margin: -4px 0 1px; transform-origin: center; font-size: 22px; }
-.pp .stat .swap s { font-weight: 500; font-size: 13px; }
+.stat .swap .hand { margin: -2px 0 1px; transform-origin: center; font-size: 24px; }
+.pp .stat .swap s { font-family: system-ui, sans-serif; font-weight: 500; font-size: 12px; }
 @keyframes strike { from { background-size: 0 2px; } }
 @keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @media (prefers-reduced-motion: reduce) { .pp .swap .hand, .pp .swap s { animation: none; } }
@@ -459,13 +471,13 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
   <div class="wrap">
     <div class="top">
       <button class="btn sq lbl" id="menuBtn" aria-label="Меню"><span data-i="book"></span><small>Меню</small></button>
-      <h1 id="title">Рецепты</h1>
+      <span class="top-sp"></span>
       <button class="btn primary" id="installBtn" hidden></button>
       <button class="btn sq lbl" id="diceBtn" aria-label="Что приготовить? Случайное блюдо"><span data-i="dice"></span><small>Идея</small></button>
       <button class="btn sq lbl" id="cartBtn" aria-label="Список покупок"><span data-i="cart"></span><small>Покупки</small><span class="dot" id="cartN" hidden></span></button>
       <button class="btn sq lbl" id="favBtn" aria-label="Избранное"><span class="dot" id="favN" hidden></span></button>
     </div>
-    <div class="hdr-orn" aria-hidden="true">✦</div>
+    <div class="hdr-orn"><h1 id="title">Рецепты</h1></div>
     <div class="search-row">
       <div class="search" id="searchBox">
         <span data-i="search"></span>
@@ -474,7 +486,6 @@ html:has(body.menu-on), body.menu-on { overflow: hidden; }
       </div>
       <button class="btn" id="filterBtn" aria-label="Фильтры"><span data-i="sliders"></span><span class="dot" id="filterDot" hidden></span></button>
     </div>
-    <nav class="sections" id="sections" aria-label="Разделы"></nav>
   </div>
 </header>
 
@@ -744,8 +755,6 @@ const toggle = (set, v) => set.has(v) ? set.delete(v) : set.add(v);
 const ALL_TAGS = [...new Set(RECIPES.flatMap(r => r.tags))];
 
 function renderControls() {
-  $('#sections').innerHTML = [{ id: 'all', title: 'Все' }, ...SECTIONS].map(s =>
-    `<button class="sec-tab ${state.section === s.id ? 'on' : ''}" data-sec="${s.id}" aria-current="${state.section === s.id}">${s.title}</button>`).join('');
   const kc = $('#kcalChips'); kc.innerHTML = '';
   KCAL.forEach(([l]) => kc.append(chip(l, state.kcal.has(l), () => { toggle(state.kcal, l); update(); })));
   const tc = $('#tagChips'); tc.innerHTML = '';
@@ -780,12 +789,7 @@ function render() {
 }
 
 function update() { renderControls(); render(); }
-// Прокручивает ленту вкладок так, чтобы выбранная была по центру
-function centerTab() {
-  const strip = $('#sections'), tab = strip.querySelector('.sec-tab.on'); if (!tab) return;
-  strip.scrollLeft = tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2;
-}
-function goSection(id) { state.section = id; state.favOnly = false; update(); scrollTo(0, 0); centerTab(); }
+function goSection(id) { state.section = id; state.favOnly = false; update(); scrollTo(0, 0); }
 
 $('#main').addEventListener('click', e => {
   const fav = e.target.closest('[data-fav]');
@@ -796,7 +800,6 @@ $('#main').addEventListener('click', e => {
   const c = e.target.closest('.card'); if (c) openRecipe(c.dataset.id);
 });
 $('#main').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openRecipe(e.target.dataset.id); });
-$('#sections').addEventListener('click', e => { const b = e.target.closest('[data-sec]'); if (b) goSection(b.dataset.sec); });
 
 function toggleFav(id) {
   toggle(favorites, id); store.set('favorites', [...favorites]);
@@ -898,14 +901,18 @@ function openRecipe(id) {
       <h2>${esc(r.title)}</h2>
       <div class="tags">${r.sections.map(s => `<span class="tag sec">${esc(sectionById(s).title)}</span>`).join('')}${r.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
       <div class="stats${ppOn ? ' pp' : ''}">
-        <div class="stat">${icon('clock')}<b>${fmtTime(r.time)}</b><span>${r.wait ? esc(fmtWait(r)) : 'время'}</span></div>
-        <div class="stat">${icon('flame')}<b>${ppK !== r.kcal
-          ? `<span class="swap"><span class="hand">${ppK} ккал</span><s>${r.kcal} ккал</s></span>`
-          : `${r.kcal} ккал`}</b><span>${unitOf(r)[4]}</span></div>
-        <div class="stat portions">
-          <div class="stepper"><button id="sMinus" aria-label="Меньше порций">${icon('minus')}</button><b id="sN">${r.servings}</b><button id="sPlus" aria-label="Больше порций">${icon('plus')}</button></div>
-          <span id="sLbl">${unitWord(r, r.servings)}</span>
+        <div class="facts-row">
+          <div class="stat">${icon('clock')}<span class="lbl">Время</span><b>${fmtTime(r.time)}</b><small>${r.wait ? esc(fmtWait(r)) : 'у плиты'}</small></div>
+          <div class="stat">${icon('flame')}<span class="lbl">Калории</span><b>${ppK !== r.kcal
+            ? `<span class="swap"><span class="hand">${ppK}</span><s>${r.kcal}</s></span>`
+            : r.kcal}</b><small>ккал ${unitOf(r)[4]}</small></div>
+          <div class="stat portions">${icon('users')}<span class="lbl">${{ cup: 'Чашки', piece: 'Штуки', ball: 'Шарики' }[r.unit] || 'Порции'}</span>
+            <div class="stepper"><button id="sMinus" aria-label="Меньше">${icon('minus')}</button><b id="sN">${r.servings}</b><button id="sPlus" aria-label="Больше">${icon('plus')}</button></div>
+            <small id="sLbl">${unitWord(r, r.servings)}</small>
+          </div>
         </div>
+        <div class="macros-h"><span>Белки · жиры · углеводы</span><span>${unitOf(r)[4]}</span></div>
+        <div class="macros" id="vMacros"></div>
       </div>
       ${swaps.some(s => s.pp)
         ? `<button class="pp-switch" id="vPP" role="switch" aria-checked="${ppOn}">${icon('leaf')}<span class="txt"><b>ПП-версия</b><small>${ppCount} ${plural(ppCount, 'замена', 'замены', 'замен')}: без глютена, лактозы и сахара</small></span><span class="knob"></span></button>`
@@ -925,6 +932,13 @@ function openRecipe(id) {
     </div>`;
   if (feedbackOn) $('#vFb').onclick = () => openFeedback({ type: 'Ошибка', recipe: r.title });
   refreshFavButton(id);
+  // БЖУ: граммы и полоска — доля калорий, которую даёт каждый
+  const renderMacros = () => {
+    const m = macros(r, ppOn), all = m.p * 4 + m.f * 9 + m.c * 4 || 1;
+    $('#vMacros').innerHTML = [['Белки', m.p, m.p * 4, 'p'], ['Жиры', m.f, m.f * 9, 'f'], ['Углеводы', m.c, m.c * 4, 'c']]
+      .map(([l, g, k, c]) => `<div class="mac ${c}"><span class="lbl">${l}</span><b>${g}<small>г</small></b><i><s style="width:${Math.round(k / all * 100)}%"></s></i></div>`).join('');
+  };
+  renderMacros();
   const syncUncheck = () => { $('#vUncheck').hidden = !checked.size; };
   $('#viewPanel').querySelectorAll('.ing input').forEach(cb => cb.onchange = () => {
     const n = +cb.dataset.n; cb.checked ? checked.add(n) : checked.delete(n);
@@ -935,7 +949,7 @@ function openRecipe(id) {
   if (ppCount) $('#vPP').onclick = () => {
     ppOn = !ppOn; ppOn ? ppSet.add(id) : ppSet.delete(id); store.set('pp', [...ppSet]);
     $('#vPP').setAttribute('aria-checked', ppOn); $('#viewPanel .ing').classList.toggle('pp', ppOn);
-    $('#viewPanel .stats').classList.toggle('pp', ppOn); setPortions(portions);
+    $('#viewPanel .stats').classList.toggle('pp', ppOn); setPortions(portions); renderMacros();
     render();   // карточка под рецептом тоже покажет ПП-калории
   };
   // Калькулятор порций: пересчитываем количества в ингредиентах и шагах, отметки и ПП-замены остаются
@@ -1481,7 +1495,7 @@ function showMenu(withCover) {
 }
 function leaveMenu(go) {
   Object.assign(state, freshFilters(), { q: '', section: go === 'fav' ? 'all' : go, favOnly: go === 'fav' });
-  $('#q').value = ''; update(); scrollTo(0, 0); centerTab();
+  $('#q').value = ''; update(); scrollTo(0, 0);
   const m = $('#menu');
   m.classList.add('leaving'); document.body.classList.remove('menu-on');
   $('#hdr').inert = $('#main').inert = false;
@@ -1510,7 +1524,6 @@ if (startHash === 'fav' || sectionById(startHash)) {
   history.pushState({ app: 1 }, '');
 } else showMenu(true);
 update();
-centerTab();
 syncCartDot();
 
 // Сами докачиваем фото только по Wi-Fi (телефон мог почистить память); по мобильному интернету — кнопкой в меню

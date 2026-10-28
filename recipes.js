@@ -748,6 +748,122 @@ function ppKcal(r) {
   return Math.round((r.kcal + delta) / 10) * 10;
 }
 
+// БЖУ: какая доля калорий блюда приходится на белки, жиры и углеводы (%). Оценка по составу рецепта
+const MACRO_SPLIT = {
+  'syrniki': [24, 36, 40],
+  'egg-toast': [18, 52, 30],
+  'french-toast': [14, 38, 48],
+  'oatmeal': [13, 22, 65],
+  'smoothie-bowl': [9, 22, 69],
+  'blini': [12, 33, 55],
+  'borscht': [17, 33, 50],
+  'pumpkin-soup': [8, 45, 47],
+  'chicken-curry': [30, 40, 30],
+  'carbonara': [16, 42, 42],
+  'penne': [11, 25, 64],
+  'burger': [22, 48, 30],
+  'egg-bowl': [22, 40, 38],
+  'buddha-bowl': [14, 36, 50],
+  'salmon': [32, 50, 18],
+  'chicken-breast': [62, 30, 8],
+  'pork-chop': [26, 52, 22],
+  'steak': [34, 64, 2],
+  'pizza': [17, 33, 50],
+  'roast-chicken': [38, 56, 6],
+  'greek-salad': [10, 75, 15],
+  'avocado-egg-salad': [18, 70, 12],
+  'jar-salad': [17, 45, 38],
+  'cookies': [5, 46, 49],
+  'panna-cotta': [6, 64, 30],
+  'shashlik': [32, 62, 6],
+  'ribs': [26, 66, 8],
+  'choco-cake': [6, 50, 44],
+  'strawberry-cake': [7, 48, 45],
+  'shakshuka': [24, 52, 24],
+  'omelette': [30, 60, 10],
+  'pancakes': [11, 28, 61],
+  'parfait': [18, 28, 54],
+  'waffles': [9, 42, 49],
+  'chia-pudding': [14, 44, 42],
+  'eggs-benedict': [19, 64, 17],
+  'chicken-soup': [36, 30, 34],
+  'plov': [18, 40, 42],
+  'ramen': [22, 35, 43],
+  'tom-yum': [38, 32, 30],
+  'lentil-soup': [24, 20, 56],
+  'lasagna': [23, 46, 31],
+  'meatballs': [27, 45, 28],
+  'shrimp-pasta': [20, 32, 48],
+  'ratatouille': [8, 52, 40],
+  'stuffed-peppers': [22, 40, 38],
+  'hummus': [15, 45, 40],
+  'bruschetta': [11, 38, 51],
+  'guacamole': [6, 62, 32],
+  'energy-balls': [8, 38, 54],
+  'fruit-salad': [5, 5, 90],
+  'wrap': [30, 34, 36],
+  'tiramisu': [10, 52, 38],
+  'sea-buckthorn-tea': [2, 10, 88],
+  'masala-chai': [14, 30, 56],
+  'thyme-mint-tea': [1, 1, 98],
+  'cranberry-tea': [1, 1, 98],
+  'matcha-latte': [20, 30, 50],
+  'golden-milk': [16, 36, 48],
+  'mulled-juice': [1, 1, 98],
+  'ivan-tea': [2, 1, 97],
+  'iced-peach-tea': [1, 1, 98],
+  'hibiscus-tea': [1, 1, 98],
+  'ginger-lemon-tea': [1, 1, 98],
+  'apple-cinnamon-tea': [1, 2, 97],
+  'olivier': [12, 62, 26],
+  'caesar': [26, 52, 22],
+  'vinegret': [6, 50, 44],
+  'shuba': [14, 64, 22],
+  'caprese': [21, 69, 10],
+  'vitamin-salad': [7, 45, 48],
+  'shchi': [25, 40, 35],
+  'solyanka': [28, 58, 14],
+  'ukha': [48, 20, 32],
+  'mushroom-soup': [11, 60, 29],
+  'okroshka': [22, 40, 38],
+  'pirozhki-cabbage': [9, 30, 61],
+  'pirozhki-potato': [8, 34, 58],
+  'pirozhki-meat': [19, 34, 47],
+  'sharlotka': [8, 16, 76],
+  'chicken-mushroom-pie': [20, 50, 30],
+  'ossetian-pie': [19, 38, 43],
+  'vatrushki': [18, 30, 52],
+  'lazy-vareniki': [26, 36, 38],
+  'zapekanka': [34, 22, 44],
+  'steam-cutlets': [50, 30, 20],
+  'makarony-po-flotski': [19, 38, 43],
+  'banana-oladi': [12, 26, 62],
+  'kartofelnaya-zapekanka': [22, 42, 36],
+  'lyulya-kebab': [32, 60, 8],
+  'chicken-shashlik': [46, 46, 8],
+  'grill-wings': [32, 56, 12],
+  'grill-mackerel': [38, 60, 2],
+  'shrimp-skewers': [58, 36, 6],
+  'grill-vegetables': [8, 58, 34],
+  'grill-mushrooms': [30, 40, 30],
+  'grill-corn': [9, 42, 49],
+  'grill-potatoes': [8, 40, 52],
+  'grill-pineapple': [2, 26, 72]
+};
+// Граммы белков, жиров и углеводов на порцию (1 г белка или углеводов ≈ 4 ккал, жира ≈ 9 ккал).
+// В ПП-версии калории меняют сахар (углеводы) и жирные продукты (жиры) — эту разницу и вычитаем
+const CARB_SWAP = /эритрит|ванилин|гранола|барбекю/i;
+function macros(r, pp) {
+  const [p, f, c] = MACRO_SPLIT[r.id] || [20, 35, 45];
+  const g = { p: r.kcal * p / 400, f: r.kcal * f / 900, c: r.kcal * c / 400 };
+  if (pp) for (const sw of r.ingredients.map(ppSwap)) {
+    if (!sw.dk) continue;
+    const dk = sw.dk * grams(sw.rest) / r.servings;
+    if (CARB_SWAP.test(sw.pp)) g.c = Math.max(0, g.c + dk / 4); else g.f = Math.max(0, g.f + dk / 9);
+  }
+  return { p: Math.round(g.p), f: Math.round(g.f), c: Math.round(g.c) };
+}
+
 // Сезонные рецепты попадают в раздел «Зимнее/Весеннее/Летнее/Осеннее меню» текущего времени года
 RECIPES.forEach(r => { if ((r.seasons || []).includes(SEASON)) r.sections.push('season'); });
 
