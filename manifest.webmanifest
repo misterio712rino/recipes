@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Мои рецепты",
   "short_name": "Рецепты",
-  "description": "Рецепты с фотографиями: завтраки, обеды, ужины, перекусы, правильное питание, праздничное меню и авторские чаи",
+  "description": "Рецепты с фотографиями: блюда по настроению, сезонное меню и авторские чаи",
   "lang": "ru",
   "dir": "ltr",
   "start_url": "./",
@@ -19,8 +19,8 @@
   ],
   "shortcuts": [
     { "name": "Избранное", "url": "./#fav", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Завтраки", "url": "./#breakfast", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Праздничное меню", "url": "./#festive", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Напитки", "url": "./#drinks", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Сезонное меню", "url": "./#season", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Доброе утро", "url": "./#morning", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Уютный вечер", "url": "./#cozy", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
